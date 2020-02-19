@@ -8,8 +8,8 @@ PARAM_INPUT_TOPIC = '~input_topic'
 PARAM_MAX_VELOCITY = '~max_velocity'
 
 # Output topics
-OUTTOPIC_HUMAN_INPUT_RAW = 'human_input/raw'
-OUTTOPIC_HUMAN_INPUT_VEL = 'human_input/velocity'
+OUTTOPIC_OPERATOR_SIGNAL_RAW = 'operator_signal/raw'
+OUTTOPIC_OPERATOR_SIGNAL_VEL = 'operator_signal/velocity'
 
 # Joystick/gamepad axis map
 AXIS_X = 0
@@ -26,8 +26,8 @@ class OperatorNode:
         self.max_velocity = rospy.get_param(PARAM_MAX_VELOCITY)
 
         # Create publishers
-        self.pub_raw = rospy.Publisher(OUTTOPIC_HUMAN_INPUT_RAW, Float64MultiArray, queue_size=1)
-        self.pub_vel = rospy.Publisher(OUTTOPIC_HUMAN_INPUT_VEL, Float64MultiArray, queue_size=1)
+        self.pub_raw = rospy.Publisher(OUTTOPIC_OPERATOR_SIGNAL_RAW, Float64MultiArray, queue_size=1)
+        self.pub_vel = rospy.Publisher(OUTTOPIC_OPERATOR_SIGNAL_VEL, Float64MultiArray, queue_size=1)
 
         # Subscribe to joy node
         rospy.Subscriber(input_topic, Joy, self.callback)
@@ -36,20 +36,20 @@ class OperatorNode:
         """Listens for Joy messages and publishes raw human input and velocity human input."""
 
         # Extract raw human input
-        human_input_raw = [msg.axes[AXIS_X],
-                           msg.axes[AXIS_Y]]
+        operator_signal_raw = [msg.axes[AXIS_X],
+                               msg.axes[AXIS_Y]]
 
         # Compute velocity
-        human_input_vel = [self.max_velocity * human_input_raw[0],
-                           self.max_velocity * human_input_raw[1]]
+        operator_signal_vel = [self.max_velocity * operator_signal_raw[0],
+                               self.max_velocity * operator_signal_raw[1]]
 
         # Publish raw and velocity human input
         self.pub_raw.publish(
-            Float64MultiArray(data=human_input_raw)
+            Float64MultiArray(data=operator_signal_raw)
         )
 
         self.pub_vel.publish(
-            Float64MultiArray(data=human_input_vel)
+            Float64MultiArray(data=operator_signal_vel)
         )
 
 if __name__=='__main__':

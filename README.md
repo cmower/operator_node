@@ -18,5 +18,5 @@ $ roslaunch operator_node run.launch
 
 ## Output topics
 
-* `human_input/raw` [`std_msgs/Float64MultiArray`], array of length 2 containing raw human input in range [-1, 1].
-* `human_input/velocity` [`std_msgs/Float64MultiArray`], array length 2 containing velocity human input in range scaled by maximum velocity.
+* `operator_signal/raw` [`std_msgs/Float64MultiArray`], array of length 2 containing raw human input in range [-1, 1], values are unit-less.
+* `operator_signal/velocity` [`std_msgs/Float64MultiArray`], array length 2 containing velocity human input in range scaled by maximum velocity, values in m/s.
