@@ -20,7 +20,7 @@ class OperatorNode:
     def __init__(self):
 
         # Grab input topic
-        input_topic = rospy.get_param(PARAM_INPUT_TOPIC)
+        input_topic = rospy.get_param(PARAM_INPUT_TOPIC, 'joy')
 
         # Grab max velocity
         self.max_velocity = rospy.get_param(PARAM_MAX_VELOCITY)
