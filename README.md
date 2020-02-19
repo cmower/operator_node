@@ -6,6 +6,7 @@ Launch using
 ```
 $ roslaunch operator_node run.launch
 ```
+Unless commented out, a [`joy_node`](http://wiki.ros.org/joy) is started too. 
 
 ## Parameters
 
