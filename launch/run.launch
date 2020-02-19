@@ -3,11 +3,11 @@
   <!-- Start joy node (comment if not required -->
   <node pkg="joy" name="joy_node" type="joy_node">
 
-	<!-- Linux joystick device from which to read joystick events -->
+    <!-- Linux joystick device from which to read joystick events -->
     <param name="dev" type="string" value="/dev/input/js0" />
 
-	<!-- Rate in Hz at which a joystick that has a non-changing state
-		 will resend the previously sent message -->
+    <!-- Rate in Hz at which a joystick that has a non-changing state
+	 will resend the previously sent message -->
     <param name="autorepeat_rate" type="double" value="150.0"/>
 
   </node>
@@ -15,11 +15,11 @@
   <!-- Start operator_node -->
   <node pkg="operator_node" name="operator_node" type="operator_node">
 
-	<!-- Input topic for joystick/gamepad of type sensor_msgs/Joy -->
-	<param name="input_topic" type="string" value="joy"/>
+    <!-- Input topic for joystick/gamepad of type sensor_msgs/Joy -->
+    <param name="input_topic" type="string" value="joy"/>
 
-	<!-- Maximum velocity in 2D plane [m/s] -->
-	<param name="max_velocity" type="double" value="0.5"/>
+    <!-- Maximum velocity in 2D plane [m/s] -->
+    <param name="max_velocity" type="double" value="0.5"/>
 
   </node>
 
