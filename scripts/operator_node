@@ -33,9 +33,9 @@ class OperatorNode:
         rospy.Subscriber(input_topic, Joy, self.callback)
 
     def callback(self, msg):
-        """Listens for Joy messages and publishes raw human input and velocity human input."""
+        """Listens for Joy messages and publishes raw operator signals and velocity operator signals."""
 
-        # Extract raw human input
+        # Extract raw operator signal
         operator_signal_raw = [msg.axes[AXIS_X],
                                msg.axes[AXIS_Y]]
 
@@ -43,7 +43,7 @@ class OperatorNode:
         operator_signal_vel = [self.max_velocity * operator_signal_raw[0],
                                self.max_velocity * operator_signal_raw[1]]
 
-        # Publish raw and velocity human input
+        # Publish raw and velocity operator signal
         self.pub_raw.publish(
             Float64MultiArray(data=operator_signal_raw)
         )
