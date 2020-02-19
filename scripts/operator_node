@@ -25,12 +25,12 @@ class OperatorNode:
         # Grab max velocity
         self.max_velocity = rospy.get_param(PARAM_MAX_VELOCITY)
 
-        # Subscribe to joy node
-        rospy.Subscribe(input_topic, Joy, self.callback)
-
         # Create publishers
         self.pub_raw = rospy.Publisher(OUTTOPIC_HUMAN_INPUT_RAW, Float64MultiArray, queue_size=1)
         self.pub_vel = rospy.Publisher(OUTTOPIC_HUMAN_INPUT_VEL, Float64MultiArray, queue_size=1)
+
+        # Subscribe to joy node
+        rospy.Subscriber(input_topic, Joy, self.callback)
 
     def callback(self, msg):
         """Listens for Joy messages and publishes raw human input and velocity human input."""
