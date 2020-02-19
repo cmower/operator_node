@@ -1,0 +1,58 @@
+#!/usr/bin/env python
+import rospy
+from sensor_msgs.msg import Joy
+from std_msgs.msg import Float64MultiArray
+
+# Parameters
+PARAM_INPUT_TOPIC = '~input_topic'
+PARAM_MAX_VELOCITY = '~max_velocity'
+
+# Output topics
+OUTTOPIC_HUMAN_INPUT_RAW = 'human_input/raw'
+OUTTOPIC_HUMAN_INPUT_VEL = 'human_input/velocity'
+
+# Joystick/gamepad axis map
+AXIS_X = 0
+AXIS_Y = 1
+
+class OperatorNode:
+
+    def __init__(self):
+
+        # Grab input topic
+        input_topic = rospy.get_param(PARAM_INPUT_TOPIC)
+
+        # Grab max velocity
+        self.max_velocity = rospy.get_param(PARAM_MAX_VELOCITY)
+
+        # Subscribe to joy node
+        rospy.Subscribe(input_topic, Joy, self.callback)
+
+        # Create publishers
+        self.pub_raw = rospy.Publisher(OUTTOPIC_HUMAN_INPUT_RAW, Float64MultiArray, queue_size=1)
+        self.pub_vel = rospy.Publisher(OUTTOPIC_HUMAN_INPUT_VEL, Float64MultiArray, queue_size=1)
+
+    def callback(self, msg):
+        """Listens for Joy messages and publishes raw human input and velocity human input."""
+
+        # Extract raw human input
+        human_input_raw = [msg.axes[AXIS_X],
+                           msg.axes[AXIS_Y]]
+
+        # Compute velocity
+        human_input_vel = [self.max_velocity * human_input_raw[0],
+                           self.max_velocity * human_input_raw[1]]
+
+        # Publish raw and velocity human input
+        self.pub_raw.publish(
+            Float64MultiArray(data=human_input_raw)
+        )
+
+        self.pub_vel.publish(
+            Float64MultiArray(data=human_input_vel)
+        )
+
+if __name__=='__main__':
+    rospy.init_node('operator_node', anonymous=True)
+    OperatorNode()
+    rospy.spin()
