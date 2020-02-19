@@ -14,7 +14,7 @@ $ roslaunch operator_node run.launch
 
 ## Input topics
 
-* `sensor_msgs/Joy` messages from gamepad/joystick. Topic name given by parameter `input_topic`.
+* `sensor_msgs/Joy` messages from gamepad/joystick. Topic name specified by parameter `input_topic`.
 
 ## Output topics
 
