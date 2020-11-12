@@ -12,8 +12,8 @@ use_raw = False
 PARAM_INPUT_TOPIC = '~input_topic'
 PARAM_MAX_VELOCITY = '~max_velocity'
 
-# Output topics
-OUTTOPIC_OPERATOR_SIGNAL = 'operator_signal'
+INTOPIC = 'operator_signal/raw'
+OUTTOPIC = 'operator_signal'
 
 # Joystick/gamepad axis map
 AXIS_X = 0
@@ -23,9 +23,6 @@ BUTTON = 0
 class OperatorNode:
 
     def __init__(self):
-
-        # Grab input topic
-        input_topic = rospy.get_param(PARAM_INPUT_TOPIC, 'joy')
 
         # Grab max velocity
         self.max_velocity = float(rospy.get_param(PARAM_MAX_VELOCITY))
@@ -37,10 +34,10 @@ class OperatorNode:
             self._parse = self._ensureIsometry
 
         # Create publishers
-        self.pub = rospy.Publisher(OUTTOPIC_OPERATOR_SIGNAL, Joy, queue_size=1)
+        self.pub = rospy.Publisher(OUTTOPIC, Joy, queue_size=1)
 
         # Subscribe to joy node
-        rospy.Subscriber(input_topic, Joy, self.remapJoyToOperatorSignal)
+        rospy.Subscriber(INTOPIC, Joy, self.remapJoyToOperatorSignal)
 
     def _ensureIsometry(self, hraw):
         htheta = numpy.arctan2(hraw[1], hraw[0])
