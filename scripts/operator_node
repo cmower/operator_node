@@ -9,8 +9,7 @@ PARAM_INPUT_TOPIC = '~input_topic'
 PARAM_MAX_VELOCITY = '~max_velocity'
 
 # Output topics
-OUTTOPIC_OPERATOR_SIGNAL_RAW = 'operator_signal/raw'
-OUTTOPIC_OPERATOR_SIGNAL_VEL = 'operator_signal/velocity'
+OUTTOPIC_OPERATOR_SIGNAL = 'operator_signal'
 
 # Joystick/gamepad axis map
 AXIS_X = 0
@@ -27,8 +26,7 @@ class OperatorNode:
         self.max_velocity = rospy.get_param(PARAM_MAX_VELOCITY)
 
         # Create publishers
-        self.pub_raw = rospy.Publisher(OUTTOPIC_OPERATOR_SIGNAL_RAW, Float64MultiArray, queue_size=1)
-        self.pub_vel = rospy.Publisher(OUTTOPIC_OPERATOR_SIGNAL_VEL, Float64MultiArray, queue_size=1)
+        self.pub = rospy.Publisher(OUTTOPIC_OPERATOR_SIGNAL, Float64MultiArray, queue_size=1)
 
         # Subscribe to joy node
         rospy.Subscriber(input_topic, Joy, self.callback)
