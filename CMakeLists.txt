@@ -12,3 +12,8 @@ catkin_package()
 include_directories(
   ${catkin_INCLUDE_DIRS}
 )
+
+catkin_install_python(PROGRAMS
+  scripts/operator_node
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  )
