@@ -1,5 +1,7 @@
 # operator_node
 
+The `operator_node` listens to `sensor_msgs/Joy` messages on the `operator_signal/raw` topic, and publishes the parsed data in a `sensor_msgs/Joy` message on the `operator_signal` topic.
+
 ## Install
 
 1. Clone repository
@@ -17,13 +19,4 @@ Unless commented out, a [`joy_node`](http://wiki.ros.org/joy) is started too.
 
 ## Parameters
 
-* `input_topic` [`string`], Input topic for joystick/gamepad of type sensor_msgs/Joy.
 * `max_velocity` [`double`], Maximum velocity in 2D plane [m/s].
-
-## Input topics
-
-* `sensor_msgs/Joy` messages from gamepad/joystick. Topic name specified by parameter `input_topic`.
-
-## Output topics
-
-* `operator_signal` [`sensor_msgs/Joy`], operator signal
