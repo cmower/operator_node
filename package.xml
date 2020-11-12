@@ -5,7 +5,7 @@
 <package format="3">
   
   <name>operator_node</name>
-  <version>0.0.0</version>
+  <version>0.0.1</version>
   <description>The operator_node package</description>
   
   <author email="chris.mower@ed.ac.uk">Chris E. Mower</author>
