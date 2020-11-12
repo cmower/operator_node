@@ -2,7 +2,11 @@
 import rospy
 import numpy
 from sensor_msgs.msg import Joy
-from std_msgs.msg import Float64MultiArray
+
+################
+# User input
+use_raw = False
+################
 
 # Parameters
 PARAM_INPUT_TOPIC = '~input_topic'
@@ -14,6 +18,7 @@ OUTTOPIC_OPERATOR_SIGNAL = 'operator_signal'
 # Joystick/gamepad axis map
 AXIS_X = 0
 AXIS_Y = 1
+BUTTON = 0
 
 class OperatorNode:
 
@@ -23,33 +28,40 @@ class OperatorNode:
         input_topic = rospy.get_param(PARAM_INPUT_TOPIC, 'joy')
 
         # Grab max velocity
-        self.max_velocity = rospy.get_param(PARAM_MAX_VELOCITY)
+        self.max_velocity = float(rospy.get_param(PARAM_MAX_VELOCITY))
+
+        # Setup _parse method
+        if use_raw:
+            self._parse = self._useRaw
+        else:
+            self._parse = self._ensureIsometry
 
         # Create publishers
-        self.pub = rospy.Publisher(OUTTOPIC_OPERATOR_SIGNAL, Float64MultiArray, queue_size=1)
+        self.pub = rospy.Publisher(OUTTOPIC_OPERATOR_SIGNAL, Joy, queue_size=1)
 
         # Subscribe to joy node
         rospy.Subscriber(input_topic, Joy, self.remapJoyToOperatorSignal)
 
-    def remapJoyToOperatorSignal(self, msg):
-        """Listens for Joy messages and publishes raw operator signals and velocity operator signals."""
+    def _ensureIsometry(self, hraw):
+        htheta = numpy.arctan2(hraw[1], hraw[0])
+        return min(numpy.linalg.norm(hraw), 1.0) * numpy.array([numpy.cos(htheta), numpy.sin(htheta)])
 
-        # Extract raw operator signal
-        operator_signal_raw = [msg.axes[AXIS_X],
-                               msg.axes[AXIS_Y]]
+    def _useRaw(self, hraw):
+        return hraw
 
-        # Compute velocity
-        operator_signal_vel = [self.max_velocity * operator_signal_raw[0],
-                               self.max_velocity * operator_signal_raw[1]]
+    def remapJoyToOperatorSignal(self, msgin):
+        """Listens for Joy messages and publishes operator signals."""
 
-        # Publish raw and velocity operator signal
-        self.pub_raw.publish(
-            Float64MultiArray(data=operator_signal_raw)
-        )
+        # Extract raw operator signal and parse
+        hraw = numpy.array([msgin.axes[AXIS_X], msgin.axes[AXIS_Y]], dtype=float)
+        h = self.max_velocity * self._parse(hraw)
 
-        self.pub_vel.publish(
-            Float64MultiArray(data=operator_signal_vel)
-        )
+        # Create message and publish
+        msgout = Joy()
+        msgout.header.stamp = rospy.Time.now()
+        msgout.axes = h.tolist()
+        msgout.buttons = [msgin.buttons[BUTTON]]
+        self.pub.publish(msgout)
 
 if __name__=='__main__':
     rospy.init_node('operator_node', anonymous=True)
