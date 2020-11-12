@@ -1,5 +1,12 @@
 # operator_node
 
+## Install
+
+1. Clone repository
+1. `cd` into `operator_node`
+1. `$ rosdep update ; rosdep install --from-paths ./ -iry`
+1. Build catkin workspace
+
 ## Usage
 
 Launch using
@@ -19,5 +26,4 @@ Unless commented out, a [`joy_node`](http://wiki.ros.org/joy) is started too.
 
 ## Output topics
 
-* `operator_signal/raw` [`std_msgs/Float64MultiArray`], array of length 2 containing raw human input in range [-1, 1], values are unit-less.
-* `operator_signal/velocity` [`std_msgs/Float64MultiArray`], array length 2 containing velocity human input in range scaled by maximum velocity, values in m/s.
+* `operator_signal` [`sensor_msgs/Joy`], operator signal
