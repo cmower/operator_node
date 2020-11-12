@@ -8,7 +8,7 @@
 
     <!-- Rate in Hz at which a joystick that has a non-changing state
 	 will resend the previously sent message -->
-    <param name="autorepeat_rate" type="double" value="150.0"/>
+    <param name="autorepeat_rate" type="double" value="150"/>
 
   </node>
 
