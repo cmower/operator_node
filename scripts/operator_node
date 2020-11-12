@@ -29,9 +29,9 @@ class OperatorNode:
         self.pub = rospy.Publisher(OUTTOPIC_OPERATOR_SIGNAL, Float64MultiArray, queue_size=1)
 
         # Subscribe to joy node
-        rospy.Subscriber(input_topic, Joy, self.callback)
+        rospy.Subscriber(input_topic, Joy, self.remapJoyToOperatorSignal)
 
-    def callback(self, msg):
+    def remapJoyToOperatorSignal(self, msg):
         """Listens for Joy messages and publishes raw operator signals and velocity operator signals."""
 
         # Extract raw operator signal
