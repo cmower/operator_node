@@ -1,16 +1,11 @@
 #!/usr/bin/env python
 import rospy
-import numpy
+import math
 from sensor_msgs.msg import Joy
 
-################
-# User input
-use_raw = False
-################
-
 # Joystick/gamepad axis map
-AXIS_X = 0
-AXIS_Y = 1
+AXIS_X0 = 0
+AXIS_X1 = 1
 BUTTON = 0
 
 class OperatorNode:
@@ -19,32 +14,34 @@ class OperatorNode:
 
         # Setup
         self.max_velocity = float(rospy.get_param('~max_velocity'))
-        self._parse = self._useRaw if use_raw else self._ensureIsometry
 
         # Create publisher and subscriber
         self.pub = rospy.Publisher('operator_signal', Joy, queue_size=10)
         rospy.Subscriber('operator_signal/raw', Joy, self.remapJoyToOperatorSignal)
 
-    def _ensureIsometry(self, hraw):
-        htheta = numpy.arctan2(hraw[1], hraw[0])
-        return min(numpy.linalg.norm(hraw), 1.0) * numpy.array([numpy.cos(htheta), numpy.sin(htheta)])
+    def axesSignalFromMsg(self, msg):
+        hr0 = msg.axes[AXIS_X0]
+        hr1 = msg.axes[AXIS_X1]
+        htheta = math.atan2(hr1, hr0)
+        hscale = self.max_velocity * min(math.sqrt(hr0**2 + hr1**2), 1.0)
+        return [hscale * math.cos(htheta), hscale * math.sin(htheta)]
 
-    def _useRaw(self, hraw):
-        return hraw
+    def buttonSignalFromMsg(self, msg):
+        return [msg.buttons[BUTTON]]
+
+    def publishOperatorSignal(self, axes_signal, button_signal):
+        msg = Joy()
+        msg.header.stamp = rospy.Time.now()
+        msg.axes = operator_signal
+        msg.buttons = button_signal
+        self.pub.publish(msg)
 
     def remapJoyToOperatorSignal(self, msgin):
         """Listens for Joy messages and publishes operator signals."""
-
-        # Extract raw operator signal and parse
-        hraw = numpy.array([msgin.axes[AXIS_X], msgin.axes[AXIS_Y]], dtype=float)
-        h = self.max_velocity * self._parse(hraw)
-
-        # Create message and publish
-        msgout = Joy()
-        msgout.header.stamp = rospy.Time.now()
-        msgout.axes = h.tolist()
-        msgout.buttons = [msgin.buttons[BUTTON]]
-        self.pub.publish(msgout)
+        self.publishOperatorSignal(
+            self.axesSignalFromMsg(msg),
+            self.buttonSignalFromMsg(msg)
+        )
 
 if __name__=='__main__':
     rospy.init_node('operator_node', anonymous=True)
