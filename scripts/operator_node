@@ -22,7 +22,7 @@ class OperatorNode:
         self._parse = self._useRaw if use_raw else self._ensureIsometry
 
         # Create publisher and subscriber
-        self.pub = rospy.Publisher('operator_signal', Joy, queue_size=1)
+        self.pub = rospy.Publisher('operator_signal', Joy, queue_size=10)
         rospy.Subscriber('operator_signal/raw', Joy, self.remapJoyToOperatorSignal)
 
     def _ensureIsometry(self, hraw):
