@@ -9,7 +9,7 @@
     <param name="dev" type="string" value="/dev/input/js0" />
 
     <!-- Rate in Hz at which a joystick that has a non-changing state
-	 will resend the previously sent message -->
+	       will resend the previously sent message -->
     <param name="autorepeat_rate" type="double" value="100"/>
 
   </node>
