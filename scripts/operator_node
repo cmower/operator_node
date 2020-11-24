@@ -32,7 +32,7 @@ class OperatorNode:
     def publishOperatorSignal(self, axes_signal, button_signal):
         msg = Joy()
         msg.header.stamp = rospy.Time.now()
-        msg.axes = operator_signal
+        msg.axes = axes_signal
         msg.buttons = button_signal
         self.pub.publish(msg)
 
