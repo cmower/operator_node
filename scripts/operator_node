@@ -12,7 +12,9 @@ class OperatorNode:
 
     def __init__(self):
 
-        # Setup
+        # Get ROS Parameters
+        self.direction_x0 = float(rospy.get_param('~dr_x0', 1))
+        self.direction_x1 = float(rospy.get_param('~dr_x1', 1))
         self.max_velocity = float(rospy.get_param('~max_velocity'))
 
         # Create publisher and subscriber
@@ -20,8 +22,8 @@ class OperatorNode:
         rospy.Subscriber('operator_signal/raw', Joy, self.remapJoyToOperatorSignal)
 
     def axesSignalFromMsg(self, msg):
-        hr0 = msg.axes[AXIS_X0]
-        hr1 = msg.axes[AXIS_X1]
+        hr0 = self.direction_x0 * msg.axes[AXIS_X0]
+        hr1 = self.direction_x1 * msg.axes[AXIS_X1]
         htheta = math.atan2(hr1, hr0)
         hscale = self.max_velocity * min(math.sqrt(hr0**2 + hr1**2), 1.0)
         return [hscale * math.cos(htheta), hscale * math.sin(htheta)]
