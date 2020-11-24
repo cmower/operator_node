@@ -36,7 +36,7 @@ class OperatorNode:
         msg.buttons = button_signal
         self.pub.publish(msg)
 
-    def remapJoyToOperatorSignal(self, msgin):
+    def remapJoyToOperatorSignal(self, msg):
         """Listens for Joy messages and publishes operator signals."""
         self.publishOperatorSignal(
             self.axesSignalFromMsg(msg),
