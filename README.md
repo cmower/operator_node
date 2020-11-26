@@ -21,5 +21,3 @@ Unless commented out, a [`joy_node`](http://wiki.ros.org/joy) is started too.
 
 * `max_velocity` [`double`], Maximum velocity in 2D plane [m/s].
 
-
-Test
