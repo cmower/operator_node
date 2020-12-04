@@ -21,7 +21,8 @@
     <param name="max_velocity" type="double" value="0.08"/>
 
     <!-- Axes direction (optional) -->
-    <param name="dr_x0" type="double" value="-1.0"/>
+    <param name="flip_axes" type="bool" value="true"/>
+    <param name="dr_x1" type="double" value="-1.0"/>
 
   </node>
 
