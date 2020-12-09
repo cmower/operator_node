@@ -3,11 +3,6 @@ import rospy
 import math
 from sensor_msgs.msg import Joy
 
-# Joystick/gamepad axis map
-AXIS_X0 = 0
-AXIS_X1 = 1
-BUTTON = 0
-
 class OperatorNode:
 
     def __init__(self):
@@ -21,6 +16,8 @@ class OperatorNode:
         self.direction_x0 = float(rospy.get_param('~dr_x0', 1))
         self.direction_x1 = float(rospy.get_param('~dr_x1', 1))
         self.max_velocity = float(rospy.get_param('~max_velocity'))
+        self.axis_x0 = rospy.get_param('~ax_x0', 0)
+        self.axis_x1 = rospy.get_param('~ax_x1', 1)
 
         # Create publisher and subscriber
         self.pub_signal = rospy.Publisher('operator_signal', Joy, queue_size=10)
