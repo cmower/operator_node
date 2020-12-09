@@ -32,6 +32,8 @@
         output="screen">
 
     <remap from="raw" to="joy/remapped/raw"/>
+    <remap from="normalized" to="operator/signal/normalized"/>
+    <remap from="signal" to="operator/signal"/>
 
     <!-- Maximum velocity in 2D plane [m/s] (required) -->
     <param name="max_velocity" type="double" value="0.08"/>
