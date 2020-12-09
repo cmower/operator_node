@@ -30,7 +30,9 @@ RemapNode::RemapNode(int argc, char **argv)
   double dt=1.0/static_cast<double>(hz);
   pub = nh.advertise<sensor_msgs::Joy>("joy_out", 1000);
   sub = nh.subscribe("joy_in", 1000, &RemapNode::joyReader, this);
-  timer = nh.createTimer(ros::Duration(dt), &RemapNode::updateJoy, this);
+  sensor_msgs::Joy::ConstPtr first_msg = ros::topic::waitForMessage<sensor_msgs::Joy>("joy_in");
+  joyReader(first_msg);
+  timer = nh.createTimer(ros::Duration(1.0/static_cast<double>(hz)), &RemapNode::updateJoy, this);
 }
 
 RemapNode::~RemapNode()
