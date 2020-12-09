@@ -4,7 +4,7 @@
 class RemapNode
 {
 
-  sensor_msgs::Joy _joy_msg;
+  sensor_msgs::Joy joy_msg;
   ros::Publisher pub;
   ros::Subscriber sub;
   ros::Timer timer;
@@ -40,12 +40,12 @@ RemapNode::~RemapNode()
 
 void RemapNode::joyReader(const sensor_msgs::Joy::ConstPtr& msg)
 {
-  _joy_msg = *msg;
+  joy_msg = *msg;
 }
 
 void RemapNode::updateJoy(const ros::TimerEvent& event)
 {
-  sensor_msgs::Joy msg_out = _joy_msg;
+  sensor_msgs::Joy msg_out = joy_msg;
   msg_out.header.stamp = ros::Time::now();
   pub.publish(msg_out);
 }
