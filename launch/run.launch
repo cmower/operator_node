@@ -28,7 +28,7 @@
   <!-- Start operator_node -->
   <node pkg="operator_node"
         name="operator_node"
-        type="operator_node"
+        type="operator_node_two_axis"
         output="screen">
 
     <remap from="raw" to="joy/remapped/raw"/>
