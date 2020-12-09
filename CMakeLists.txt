@@ -19,6 +19,6 @@ add_executable(joy_remap src/joy_remap.cpp)
 target_link_libraries(joy_remap ${catkin_LIBRARIES})
 
 catkin_install_python(PROGRAMS
-  scripts/operator_node
+  scripts/operator_node.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   )
