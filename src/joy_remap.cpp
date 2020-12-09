@@ -23,11 +23,13 @@ public:
 RemapNode::RemapNode(int argc, char **argv)
 {
   ros::init(argc, argv, "joy_remap_node");
-  ros::NodeHandle nh_namespace("~");
-  int hz;
-  if (~nh_namespace.getParam("hz", hz))
-    hz = 100;
+  ros::NodeHandle nh_param("~");
   ros::NodeHandle nh;
+  int hz;
+
+  // Get parameters
+  nh_param.param<int>("hz", hz, 100);
+
   pub = nh.advertise<sensor_msgs::Joy>("joy_out", 1000);
   sub = nh.subscribe("joy_in", 1000, &RemapNode::joyReader, this);
   sensor_msgs::Joy::ConstPtr first_msg = ros::topic::waitForMessage<sensor_msgs::Joy>("joy_in");
