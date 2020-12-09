@@ -2,68 +2,67 @@
 import rospy
 import math
 from sensor_msgs.msg import Joy
+from std_msgs.msg import Float64MultiArray
 
 class OperatorNode:
 
     def __init__(self):
 
         rospy.init_node('operator_node')
-        rospy.on_shutdown(self.shutdown)
         self.name = rospy.get_name()
+        rospy.on_shutdown(self.shutdown)
 
         # Get ROS Parameters
-        self.flip_axes = rospy.get_param('~flip_axes', False)
         self.direction_x0 = float(rospy.get_param('~dr_x0', 1))
         self.direction_x1 = float(rospy.get_param('~dr_x1', 1))
         self.max_velocity = float(rospy.get_param('~max_velocity'))
         self.axis_x0 = rospy.get_param('~ax_x0', 0)
         self.axis_x1 = rospy.get_param('~ax_x1', 1)
-
-        # Create publisher and subscriber
-        self.pub_signal = rospy.Publisher('operator_signal', Joy, queue_size=10)
-        self.pub_signal_normalized = rospy.Publisher('operator_signal/normalized', Joy, queue_size=10)
-        self.sub = rospy.Subscriber('operator_signal/raw', Joy, self.remapJoyToOperatorSignal)
-
-    def __normalizedAxesSignalFromMsg(self, msg):
-        hr0 = self.direction_x0 * msg.axes[AXIS_X0]
-        hr1 = self.direction_x1 * msg.axes[AXIS_X1]
-        htheta = math.atan2(hr1, hr0)
-        hscale = min(math.sqrt(hr0**2 + hr1**2), 1.0)
-        h = [hscale * math.cos(htheta), hscale * math.sin(htheta)]
-        if self.flip_axes:
-            h_out = [h[1], h[0]]
+        flip_axes = rospy.get_param('~flip_axes', False)
+        if flip_axes:
+            self.__handle_axes = self.__flip_axes
         else:
-            h_out = h
-        return h_out
+            self.__handle_axes = self.__dont_flip_axes
 
-    def __buttonSignalFromMsg(self, msg):
-        return [msg.buttons[BUTTON]]
+    def setupPublishers(self):
+        self.pub_signal = rospy.Publisher(
+            'signal', Float64MultiArray, queue_size=10
+        )
+        self.pub_norm = rospy.Publisher(
+            'normalized', Float64MultiArray, queue_size=10
+        )
 
-    def __publishOperatorSignal(self, axes_signal, button_signal):
-        msg = Joy()
-        msg.header.stamp = rospy.Time.now()
-        msg.axes = axes_signal
-        msg.buttons = button_signal
-        self.pub_signal.publish(msg)
+    def setupJoyRemapper(self):
+        self.sub = rospy.Subscriber('raw', Joy, self.remapJoyToOperatorSignal)
 
-    def __publishNormalizedOperatorSignal(self, normalized_axes_signal, button_signal):
-        msg = Joy()
-        msg.header.stamp = rospy.Time.now()
-        msg.axes = normalized_axes_signal
-        msg.buttons = button_signal
-        self.pub_signal_normalized.publish(msg)
+    def __flip_axes(self, h):
+        h.reverse()
+
+    def __dont_flip_axes(self, h):
+        pass
+
+    def __publish(self, pub, h):
+        pub.publish(Float64MultiArray(data=h))
 
     def remapJoyToOperatorSignal(self, msg):
         """Listens for Joy messages and publishes operator signals."""
-        hnorm = self.__normalizedAxesSignalFromMsg(msg)
-        button_signal = self.__buttonSignalFromMsg(msg)
-        self.__publishOperatorSignal(
-            [self.max_velocity*hnorm[0], self.max_velocity*hnorm[1]],
-            button_signal
-        )
-        self.__publishNormalizedOperatorSignal(
-            hnorm, button_signal
-        )
+
+        # Get raw signal
+        hr0 = self.direction_x0 * msg.axes[self.axis_x0]
+        hr1 = self.direction_x1 * msg.axes[self.axis_x1]
+
+        # Normalize
+        htheta = math.atan2(hr1, hr0)
+        hscale = min(math.sqrt(hr0**2 + hr1**2), 1.0)
+        hnorm = [hscale * math.cos(htheta), hscale * math.sin(htheta)]
+        self.__handle_axes(hnorm)
+
+        # Compute signal
+        hsignal = [self.max_velocity*hnorm[0], self.max_velocity*hnorm[1]]
+
+        # Publish messages
+        self.__publish(self.pub_norm, hnorm)
+        self.__publish(self.pub_signal, hsignal)
 
     def spin(self):
         try:
@@ -76,5 +75,7 @@ class OperatorNode:
         rospy.loginfo(f'{self.name}: Shutting down')
 
 if __name__ == '__main__':
-    OperatorNode()
-    rospy.spin()
+    node = OperatorNode()
+    node.setupPublishers()
+    node.setupJoyRemapper()
+    node.spin()
