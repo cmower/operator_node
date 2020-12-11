@@ -73,12 +73,12 @@ void OperatorNode::remapJoyToOperatorSignal(const sensor_msgs::Joy::ConstPtr& ms
   const double hn0 = hscale * std::cos(htheta);
   const double hn1 = hscale * std::sin(htheta);
   if (flip_axes==true){
-    msg_out_norm.data.push_back(hn1);
-    msg_out_norm.data.push_back(hn0);
+    msg_out_norm.data.push_back(direction_x0*hn1);
+    msg_out_norm.data.push_back(direction_x1*hn0);
   }
   else {
-    msg_out_norm.data.push_back(hn0);
-    msg_out_norm.data.push_back(hn1);
+    msg_out_norm.data.push_back(direction_x0*hn0);
+    msg_out_norm.data.push_back(direction_x1*hn1);
   }
 
   // Compute signal
