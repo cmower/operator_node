@@ -47,6 +47,7 @@ KeyboardToJoyNode::KeyboardToJoyNode(int argc, char** argv)
 
 KeyboardToJoyNode::~KeyboardToJoyNode()
 {
+  timer.stop();
   sub_keyupp.shutdown();
   sub_keydwn.shutdown();
 }

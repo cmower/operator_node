@@ -46,6 +46,7 @@ RemapNode::RemapNode(int argc, char **argv)
 
 RemapNode::~RemapNode()
 {
+  timer.stop();
   sub.shutdown();
 }
 
