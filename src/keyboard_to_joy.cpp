@@ -2,7 +2,7 @@
 #include "sensor_msgs/Joy.h"
 #include "keyboard/Key.h"
 
-#include "single_key.h"
+#include "single_key.hpp"
 
 class KeyboardToJoyNode
 {
