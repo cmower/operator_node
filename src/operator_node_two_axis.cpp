@@ -41,7 +41,7 @@ OperatorNode::OperatorNode(int argc, char **argv)
   nh_param.param<int>("ax_x0", axis_x0, 0);
   nh_param.param<int>("ax_x1", axis_x1, 1);
   nh_param.param<bool>("flip_axes", flip_axes, false);
-  nh_param.param<double>("max_velocity", max_velocity, 1.0);
+  nh.getParam("maximum_velocity", max_velocity);
 
   // Setup publishers
   pub_norm = nh.advertise<std_msgs::Float64MultiArray>("normalized", 1000);
