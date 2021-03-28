@@ -7,6 +7,7 @@ class OperatorNode:
     """Operator node base class"""
 
     def __init__(self, rospy):
+        """Base-initialization."""
         self.rospy = rospy
         self.rospy.init_node('operator_node')
         self.name = self.rospy.get_name()
@@ -15,7 +16,7 @@ class OperatorNode:
         self.joy_to_h_map = rospy.get_param('~joy_to_h_map')
 
     def start_update(self):
-        """Starts the main update loop"""
+        """Starts the main update loop."""
         dt = 1.0/float(self.hz)
         self.update_timer = self.rospy.Timer(self.rospy.Duration(dt), self.update)
         self.rospy.loginfo(f'[{self.name}] Started update timer.')
@@ -42,6 +43,7 @@ class OperatorNode:
         return joy.axes[self.joy_to_h_map]
 
     def publish(self, u):
+        """Publishes control command."""
         self.u_pub.publish(Float64MultiArray(data=u))
 
     def spin(self):
