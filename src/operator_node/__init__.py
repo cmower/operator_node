@@ -14,10 +14,6 @@ class OperatorNode:
         self.hz = int(rospy.get_param('~sampling_rate', 100))
         self.joy_to_h_map = rospy.get_param('~joy_to_h_map')
 
-    def set_rospy(self, rospy):
-        """Passes rospy instance to base-class."""
-        self.rospy = rospy
-
     def start_update(self):
         """Starts the main update loop"""
         dt = 1.0/float(self.hz)
