@@ -9,6 +9,8 @@ find_package(catkin REQUIRED COMPONENTS
   keyboard
   )
 
+catkin_python_setup()
+
 catkin_package()
 
 include_directories(
@@ -23,3 +25,9 @@ target_link_libraries(operator_node_two_axis ${catkin_LIBRARIES})
 
 add_executable(keyboard_to_joy src/keyboard_to_joy.cpp)
 target_link_libraries(keyboard_to_joy ${catkin_LIBRARIES})
+
+catkin_install_python(PROGRAMS
+  scripts/operator_node_method_one.py
+  scripts/operator_node_method_two.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
