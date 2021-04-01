@@ -5,19 +5,20 @@ from operator_node import OperatorNode, main
 
 class Node(OperatorNode):
 
-    tol = 1e-9
-
     def __init__(self):
         """Initialize node."""
-        super().__init__(self, rospy, 'operator_node')
-        self.nu = float(rospy.get_param('mu'))
+        super().__init__(rospy, 'operator_node')
+        self.nu = float(rospy.get_param('~nu'))
         rospy.loginfo(f'{self.name}: Initialization complete.')
 
     def update(self, event):
         """Main update loop, maps operator signal to control and publishes the result."""
         h = self.get_h()
         norm_h = math.sqrt(sum(hi*hi for hi in h))
-        scaling_factor = float(norm_h > self.tol) * self.nu * min(norm_h, 1.0) / norm_h
+        try:
+            scaling_factor = self.nu * min(norm_h, 1.0) / norm_h
+        except ZeroDivisionError:
+            scaling_factor = 0.0
         self.publish([scaling_factor * hi for hi in h])
 
 
