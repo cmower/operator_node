@@ -13,7 +13,7 @@ class Node(RosNode):
         super().__init__(rospy, 'keyboard_to_joy_mapper_node')
 
         # Get sampling frequency from ros
-        self.hz = self.rospy.get_param('~frequency', 100)
+        self.hz = self.rospy.get_param('~sampling_rate', 100)
 
         # Get axes maps from ros
         self.positive_axes_map = [getattr(Key, axis_key) for axis_key in self.rospy.get_param('~positive_axes', [])]
