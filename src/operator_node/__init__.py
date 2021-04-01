@@ -23,7 +23,16 @@ class OperatorNode(RosNode):
         super().__init__(self, rospy, name)
         self.rospy.on_shutdown(self.shutdown)
         self.hz = int(rospy.get_param('~sampling_rate', 100))
-        self.joy_to_h_map = rospy.get_param('~joy_to_h_map')
+        self.joy_to_h_map = [int(idx) for idx in rospy.get_param('~joy_to_h_map')]
+
+        flip = [
+            -1 if int(f)>0 else 1
+            for f in rospy.get_param('~flip', [])
+        ]
+        if len(flip) == 0:
+            self.flip = [1]*len(self.joy_to_h_map)
+        else:
+            self.flip = flip
 
     def start_update(self):
         """Starts the main update loop."""
@@ -50,7 +59,7 @@ class OperatorNode(RosNode):
     def get_h(self):
         """Return the current operator input."""
         joy = copy.deepcopy(self.joy)
-        return joy.axes[self.joy_to_h_map]
+        return [self.flip[i]*joy.axes[idx] for i, idx in enumerate(self.joy_to_h_map)]
 
     def publish(self, u):
         """Publishes control command."""
