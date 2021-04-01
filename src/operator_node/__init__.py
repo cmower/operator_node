@@ -2,15 +2,25 @@ import copy
 from sensor_msgs.msg import Joy
 from std_msgs.msg import Float64MultiArray
 
-class OperatorNode:
+class RosNode:
+
+    def __init__(self, rospy, name):
+        """Ros node base class"""
+        self.rospy = rospy
+        self.rospy.init_node(name)
+        self.name = rospy.get_name()
+
+    def spin(self):
+        """ROS-spin"""
+        self.rospy.spin()
+
+class OperatorNode(RosNode):
 
     """Operator node base class"""
 
-    def __init__(self, rospy):
+    def __init__(self, rospy, name):
         """Base-initialization."""
-        self.rospy = rospy
-        self.rospy.init_node('operator_node')
-        self.name = self.rospy.get_name()
+        super().__init__(self, rospy, name)
         self.rospy.on_shutdown(self.shutdown)
         self.hz = int(rospy.get_param('~sampling_rate', 100))
         self.joy_to_h_map = rospy.get_param('~joy_to_h_map')
@@ -45,10 +55,6 @@ class OperatorNode:
     def publish(self, u):
         """Publishes control command."""
         self.u_pub.publish(Float64MultiArray(data=u))
-
-    def spin(self):
-        """ROS-spin"""
-        self.rospy.spin()
 
     def shutdown(self):
         """Shutdown node."""
