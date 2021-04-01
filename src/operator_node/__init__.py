@@ -24,19 +24,12 @@ class OperatorNode(RosNode):
         """Operator node base class"""
         super().__init__(rospy, name)
         self.rospy.on_shutdown(self.shutdown)
-        self.hz = int(rospy.get_param('~sampling_rate', 100))
         self.joy_to_h_map = [int(idx) for idx in rospy.get_param('~joy_to_h_map')]
         flip = [
             -1 if int(f)>0 else 1
             for f in rospy.get_param('~flip', [])
         ]
         self.flip = flip if len(flip) > 0 else [1]*len(self.joy_to_h_map)
-
-    def start_update(self):
-        """Starts the main update loop."""
-        dt = 1.0/float(self.hz)
-        self.update_timer = self.rospy.Timer(self.rospy.Duration(dt), self.update)
-        self.rospy.loginfo(f'{self.name}: Started update timer.')
 
     def setup_joy_reader(self):
         """Setup the joy reader."""
@@ -46,18 +39,15 @@ class OperatorNode(RosNode):
         self.rospy.loginfo(f'{self.name}: Joy subscriber successfully setup.')
 
     def read_joy(self, msg):
-        """Read joy message."""
-        self.joy = msg
+        """Read joy message, map operator input, and publish control signal."""
+        h = [self.flip[i]*msg.axes[idx] for i, idx in enumerate(self.joy_to_h_map)]
+        u = self.f(h)
+        self.publish(u)
 
     def setup_publishers(self):
         """Set's up the control publisher."""
         output_topic = 'operator_node/u'
         self.u_pub = self.rospy.Publisher(output_topic, Float64MultiArray, queue_size=10)
-
-    def get_h(self):
-        """Return the current operator input."""
-        joy = copy.deepcopy(self.joy)
-        return [self.flip[i]*joy.axes[idx] for i, idx in enumerate(self.joy_to_h_map)]
 
     def publish(self, u):
         """Publishes control command."""
@@ -75,5 +65,4 @@ class OperatorNode(RosNode):
 def main(node):
     node.setup_publishers()
     node.setup_joy_reader()
-    node.start_update()
     node.spin()
