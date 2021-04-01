@@ -9,9 +9,9 @@ class Node(OperatorNode):
 
     def __init__(self):
         """Initialize node."""
-        super().__init__(self, rospy)
+        super().__init__(self, rospy, 'operator_node')
         self.nu = float(rospy.get_param('mu'))
-        rospy.loginfo(f'[{self.name}] Initialization complete.')
+        rospy.loginfo(f'{self.name}: Initialization complete.')
 
     def update(self, event):
         """Main update loop, maps operator signal to control and publishes the result."""
