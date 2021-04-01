@@ -17,7 +17,7 @@ The `operator_node` package performs parsing from raw interface signals to the r
 
 ### Parameters
 
-__Required_:
+_Required_:
 * `~m`, [list[float]]: list of scaling terms.
 * `~b`, [list[float]]: list of shifting terms.
 
@@ -34,7 +34,7 @@ _Optional_:
 
 ### Parameters
 
-__Required_:
+_Required_:
 * `~nu`, [float]: Scaling factor.
 
 _Optional_:
