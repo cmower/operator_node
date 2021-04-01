@@ -1,25 +1,12 @@
 <launch>
 
-  <node pkg="keyboard"
-        name="keyboard"
-        type="keyboard"/>
+  <node pkg="keyboard" name="keyboard" type="keyboard"/>
 
-  <node pkg="operator_node"
-        name="keyboard_to_joy"
-        type="keyboard_to_joy">
-    <remap from="joy_out" to="joy/raw"/>
-  </node>
-
-  <node pkg="operator_node"
-        name="convert_operator_signal_to_velocity"
-        type="operator_node_two_axis"
-        output="screen">
-    <remap from="raw" to="joy/raw"/>
-    <remap from="normalized" to="operator/signal/normalized"/>
-    <remap from="signal" to="operator/signal"/>
-    <param name="max_velocity" type="double" value="0.1"/>
-    <param name="flip_axes" type="bool" value="true"/>
-    <param name="dr_x1" type="double" value="-1.0"/>
+  <node pkg="operator_node" name="keyboard_to_joy_mapper_node" type="keyboard_to_joy_mapper_node.py" output="screen">
+    <rosparam param="positive_axes">[KEY_UP, KEY_RIGHT]</rosparam>
+    <rosparam param="negative_axes">[KEY_DOWN, KEY_LEFT]</rosparam>
+    <rosparam param="buttons">[KEY_g]</rosparam>
+    <param name="frequency" type="int" value="120"/>
   </node>
 
 </launch>
