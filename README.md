@@ -13,7 +13,7 @@ The `operator_node` package performs parsing from raw interface signals to the r
 
 ## `operator_node_method_one.py`
 
-<img src="https://latex.codecogs.com/gif.latex?f(h) = \text{diag}(m) + b"/>
+- <img src="https://latex.codecogs.com/gif.latex?f(h) = \text{diag}(m) + b"/>
 
 ### Parameters
 
@@ -30,7 +30,7 @@ _Optional_:
 
 ## `operator_node_method_two.py`
 
-<img src="https://latex.codecogs.com/gif.latex?f(h) = \nu\frac{\min(0, 1)h}{\|h\|}"/>
+- <img src="https://latex.codecogs.com/gif.latex?f(h) = \nu\frac{\min(0, 1)h}{\|h\|}"/>
 
 ### Parameters
 
