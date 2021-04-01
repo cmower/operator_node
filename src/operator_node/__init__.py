@@ -4,8 +4,10 @@ from std_msgs.msg import Float64MultiArray
 
 class RosNode:
 
+    """ROS node base class"""
+
     def __init__(self, rospy, name):
-        """Ros node base class"""
+        """Base-initialization."""
         self.rospy = rospy
         self.rospy.init_node(name)
         self.name = rospy.get_name()
@@ -19,8 +21,8 @@ class OperatorNode(RosNode):
     """Operator node base class"""
 
     def __init__(self, rospy, name):
-        """Base-initialization."""
-        super().__init__(self, rospy, name)
+        """Operator node base class"""
+        super().__init__(rospy, name)
         self.rospy.on_shutdown(self.shutdown)
         self.hz = int(rospy.get_param('~sampling_rate', 100))
         self.joy_to_h_map = [int(idx) for idx in rospy.get_param('~joy_to_h_map')]

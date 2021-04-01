@@ -7,6 +7,7 @@ from operator_node import RosNode
 class Node(RosNode):
 
     def __init__(self):
+        """Initialization"""
 
         # Initialize node
         super().__init__(rospy, 'keyboard_to_joy_mapper_node')
@@ -42,26 +43,33 @@ class Node(RosNode):
     # Getter
 
     def key_from_msg(self, msg):
+        """Get key from the Joy message."""
         return msg.code
 
     def index_from_positive_axes_key(self, key):
+        """Get index of key in axes map from positive."""
         return self.positive_axes_map.index(key)
 
     def index_from_negative_axes_key(self, key):
+        """Get index of key in axes map from negative."""
         return self.negative_axes_map.index(key)
 
     def index_from_button_key(self, key):
+        """Get index of key in button map."""
         return self.button_map.index(key)
 
     # Checks
 
     def is_positive_axes_key(self, key):
+        """Check if key is in the positive axes map."""
         return key in self.positive_axes_map_set
 
     def is_negative_axes_key(self, key):
+        """Check if key is in the negative axes map."""
         return key in self.negative_axes_map_set
 
     def is_button_key(self, key):
+        """Check if key is in the button map."""
         return key in self.button_map_set
 
     #
@@ -69,10 +77,12 @@ class Node(RosNode):
     #
 
     def setup_keyboard_reader(self):
+        """Setup keyboard subscribers"""
         self.sub_keydown = self.rospy.Subscriber('keyboard/keydown', Key, self.read_key_down)
         self.sub_keyup = self.rospy.Subscriber('keyboard/keyup', Key, self.read_key_up)
 
     def read_key(self, msg, state):
+        """Read a key, and set corresponding state."""
         key = self.key_from_msg(msg)
         if self.is_positive_axes_key(key):
             self.positive_axes_states[self.index_from_positive_axes_key(key)] = state
@@ -82,9 +92,11 @@ class Node(RosNode):
             self.button_states[self.index_from_button_key(key)] = state
 
     def read_key_down(self, msg):
+        """Read keydown messages."""
         self.read_key(msg, True)
 
     def read_key_up(self, msg):
+        """Read keyup messages."""
         self.read_key(msg, False)
 
     #
@@ -92,16 +104,19 @@ class Node(RosNode):
     #
 
     def start_joy_publisher(self):
+        """Setup joy publisher and start main publisher loop."""
         self.pub = self.rospy.Publisher('joy', Joy, queue_size=10)
         self.timer = self.rospy.Timer(self.rospy.Duration(1.0/float(self.hz)), self.publish_joy_msg)
 
     def publish_joy_msg(self, event):
+        """Main publisher loop."""
         joy = Joy()
         joy.header.stamp = rospy.Time.now()
         joy.axes = [float(p) - float(n) for p, n in zip(self.positive_axes_states, self.negative_axes_states)]
         joy.buttons = self.button_states
         self.pub.publish(joy)
 
+        
 if __name__ == '__main__':
     node = Node()
     node.setup_keyboard_reader()
