@@ -38,14 +38,14 @@ class OperatorNode(RosNode):
         """Starts the main update loop."""
         dt = 1.0/float(self.hz)
         self.update_timer = self.rospy.Timer(self.rospy.Duration(dt), self.update)
-        self.rospy.loginfo(f'[{self.name}] Started update timer.')
+        self.rospy.loginfo(f'{self.name}: Started update timer.')
 
     def setup_joy_reader(self):
         """Setup the joy reader."""
         input_topic = 'joy'
         self.read_joy(self.rospy.wait_for_message(input_topic, Joy))
         self.joy_sub = self.rospy.Subscriber(input_topic, Joy, self.read_joy)
-        self.rospy.loginfo(f'[{self.name}] Joy subscriber successfully setup.')
+        self.rospy.loginfo(f'{self.name}: Joy subscriber successfully setup.')
 
     def read_joy(self, msg):
         """Read joy message."""
@@ -71,7 +71,7 @@ class OperatorNode(RosNode):
             self.joy_sub.unregister()
         if hasattr(self, 'update_timer'):
             self.update_timer.shutdown()
-        self.rospy.loginfo(f'[{self.name}] Shutdown complete.')
+        self.rospy.loginfo(f'{self.name}: Shutdown complete.')
 
 
 def main(node):
