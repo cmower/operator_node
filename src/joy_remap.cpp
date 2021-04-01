@@ -30,7 +30,7 @@ RemapNode::RemapNode(int argc, char **argv)
   int hz;
 
   // Get parameters
-  nh_param.param<int>("hz", hz, 100);
+  nh_param.param<int>("sampling_rate", hz, 100);
 
   // Setup publisher
   pub = nh.advertise<sensor_msgs::Joy>("joy_out", 1000);
