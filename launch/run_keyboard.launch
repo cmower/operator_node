@@ -6,7 +6,13 @@
     <rosparam param="positive_axes">[KEY_UP, KEY_RIGHT]</rosparam>
     <rosparam param="negative_axes">[KEY_DOWN, KEY_LEFT]</rosparam>
     <rosparam param="buttons">[KEY_g]</rosparam>
-    <param name="frequency" type="int" value="120"/>
+    <param name="frequency" type="int" value="100"/>
+  </node>
+
+  <node pkg="operator_node" name="operator_node" type="operator_node_method_two.py" output="screen">
+    <param name="nu" type="double" value="0.04"/>
+    <rosparam param="joy_to_h_map">[1, 0]</rosparam>
+    <rosparam param="flip">[0, 1]</rosparam>
   </node>
 
 </launch>
