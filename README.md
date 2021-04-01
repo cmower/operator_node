@@ -71,8 +71,8 @@ _Optional_:
 ### `Topics`
 
 _Subscribes_:
-* `keyboard/keydown`, ['keyboard/Key']: Key-down messages.
-* `keyboard/keyup`, ['keyboard/Key']: Key-up messages.
+* `keyboard/keydown`, [`keyboard/Key`]: Key-down messages.
+* `keyboard/keyup`, [`keyboard/Key`]: Key-up messages.
 
 _Publishes_
 * `joy`, [`sensor_msgs/Joy`]: keyboard messages as a joystick/gamepad
