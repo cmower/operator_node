@@ -116,7 +116,7 @@ class Node(RosNode):
         joy.buttons = self.button_states
         self.pub.publish(joy)
 
-        
+
 if __name__ == '__main__':
     node = Node()
     node.setup_keyboard_reader()
