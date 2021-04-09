@@ -76,3 +76,17 @@ _Subscribes_:
 
 _Publishes_
 * `joy`, [`sensor_msgs/Joy`]: keyboard messages as a joystick/gamepad
+
+## joy_remap
+
+When launching a `joy_node`, typically you will specify `~autorepeat_rate` as a
+parameter. This parameter determines the rate in Hz at which a joystick that has
+a non-changing state will resend the previously sent message. The result is that
+the frequency of commands is not the same as the `autorepeat_rate` - typically
+it will be slightly higher.
+
+The `joy_remap` node simply subscribes to the raw signals from `joy_node` and
+republishes the latest received message at a given frequency. This frequency can
+be specified in the launch file as a node parameter. This means that you can
+subscribe to joystick messages elsewhere at a known, consistent, frequency - if
+you care about that sort of thing.
