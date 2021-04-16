@@ -26,6 +26,7 @@ target_link_libraries(operator_node_two_axis ${catkin_LIBRARIES})
 catkin_install_python(PROGRAMS
   scripts/operator_node_method_one.py
   scripts/operator_node_method_two.py
+  scripts/operator_node_method_three.py
   scripts/keyboard_to_joy_mapper_node.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
