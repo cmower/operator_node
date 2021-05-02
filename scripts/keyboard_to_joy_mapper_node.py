@@ -1,124 +1,78 @@
 #!/usr/bin/env python3
 import rospy
+import numpy
 from keyboard.msg import Key
 from sensor_msgs.msg import Joy
-from operator_node import RosNode
+from ros_helper.node import RosNode
 
 class Node(RosNode):
 
     def __init__(self):
-        """Initialization"""
+        RosNode.__init__(rospy)
+        self.initNode('keyboard_to_joy_mapper_node')
+        self.onShutdownUseBaseShutdownMethod()
+        self.getParams([
+            ("~sampling_rate", 100),
+            ("~positive_axes", []),
+            ("~negative_axes", []),
+            ("~buttons", []),
+        ])
 
-        # Initialize node
-        super().__init__(rospy, 'keyboard_to_joy_mapper_node')
+        self.pos_axes = [
+            getattr(Key, code)
+            for code in self.params["~positive_axes"]
+        ]
+        n_axes = len(self.pos_axes)
+        self.pos_axes_states = numpy.zeros(n_axes)
+        self.neg_axes = [
+            getattr(Key, code)
+            for code in self.params["~negative_axes"]
+        ]
+        self.neg_axes_states = numpy.zeros(n_axes)
+        self.buttons = [
+            getattr(Key, code)
+            for code in self.params["~buttons"]
+        ]
+        n_buttons = len(self.buttons)
 
-        # Get sampling frequency from ros
-        self.hz = self.rospy.get_param('~sampling_rate', 100)
+        self.joy = Joy(axes=[0]*n_axes, buttons=[0]*n_buttons)
+        self.subs['keydown'] = rospy.Subscriber(
+            'keyboard/keydown', Key, self.keyDownCallback
+        )
+        self.subs['keyup'] = rospy.Subscriber(
+            'keyboard/keyup', Key, self.keyUpCallback
+        )
+        self.setupPublisher('output', 'joy', Joy)
+        self.startTimer(
+            'main_loop', self.params['~sampling_rate'], self.publishJoy
+        )
 
-        # Get axes maps from ros
-        self.positive_axes_map = [getattr(Key, axis_key) for axis_key in self.rospy.get_param('~positive_axes', [])]
-        self.negative_axes_map = [getattr(Key, axis_key)  for axis_key in self.rospy.get_param('~negative_axes', [])]
-        assert len(self.positive_axes_map) == len(self.negative_axes_map), "Positive and negative axes maps must have equal length!"
+    def keyDownCallback(self, msg):
+        if msg.code in self.pos_axes:
+            idx = self.pos_axes.index(msg.code)
+            self.pos_axes_states[idx] = 1
+        elif msg.code in self.neg_axes:
+            idx = self.neg_axes.index(msg.code)
+            self.neg_axes_states[idx] = 1
+        elif msg.code in self.buttons:
+            idx = self.buttons.index(msg.code)
+            self.joy.buttons[idx] = 1
 
-        # Get button map from ros
-        self.button_map = [getattr(Key, button_key) for button_key in self.rospy.get_param('~buttons', [])]
+    def keyUpCallback(self, msg):
+        if msg.code in self.pos_axes:
+            idx = self.pos_axes.index(msg.code)
+            self.pos_axes_states[idx] = 0
+        elif msg.code in self.neg_axes:
+            idx = self.neg_axes.index(msg.code)
+            self.neg_axes_states[idx] = 0
+        elif msg.code in self.buttons:
+            idx = self.buttons.index(msg.code)
+            self.joy.buttons[idx] = 0
 
-        # Setup positive/negative axes and button states
-        self.positive_axes_states = [False]*len(self.positive_axes_map)
-        self.negative_axes_states = [False]*len(self.negative_axes_map)
-        self.button_states = [False]*len(self.button_map)
-
-        # Parse positive/negative axes and button  maps as sets
-        self.positive_axes_map_set = set(self.positive_axes_map)
-        self.negative_axes_map_set = set(self.negative_axes_map)
-        self.button_map_set = set(self.button_map)
-
-        # Report
-        self.rospy.loginfo(f'{self.name}: Node initialized.')
-
-    #
-    # Helpful methods
-    #
-
-    # Getter
-
-    def key_from_msg(self, msg):
-        """Get key from the Joy message."""
-        return msg.code
-
-    def index_from_positive_axes_key(self, key):
-        """Get index of key in axes map from positive."""
-        return self.positive_axes_map.index(key)
-
-    def index_from_negative_axes_key(self, key):
-        """Get index of key in axes map from negative."""
-        return self.negative_axes_map.index(key)
-
-    def index_from_button_key(self, key):
-        """Get index of key in button map."""
-        return self.button_map.index(key)
-
-    # Checks
-
-    def is_positive_axes_key(self, key):
-        """Check if key is in the positive axes map."""
-        return key in self.positive_axes_map_set
-
-    def is_negative_axes_key(self, key):
-        """Check if key is in the negative axes map."""
-        return key in self.negative_axes_map_set
-
-    def is_button_key(self, key):
-        """Check if key is in the button map."""
-        return key in self.button_map_set
-
-    #
-    # Setup subscribers
-    #
-
-    def setup_keyboard_reader(self):
-        """Setup keyboard subscribers"""
-        self.sub_keydown = self.rospy.Subscriber('keyboard/keydown', Key, self.read_key_down)
-        self.sub_keyup = self.rospy.Subscriber('keyboard/keyup', Key, self.read_key_up)
-
-    def read_key(self, msg, state):
-        """Read a key, and set corresponding state."""
-        key = self.key_from_msg(msg)
-        if self.is_positive_axes_key(key):
-            self.positive_axes_states[self.index_from_positive_axes_key(key)] = state
-        if self.is_negative_axes_key(key):
-            self.negative_axes_states[self.index_from_negative_axes_key(key)] = state
-        if self.is_button_key(key):
-            self.button_states[self.index_from_button_key(key)] = state
-
-    def read_key_down(self, msg):
-        """Read keydown messages."""
-        self.read_key(msg, True)
-
-    def read_key_up(self, msg):
-        """Read keyup messages."""
-        self.read_key(msg, False)
-
-    #
-    # Setup publisher and main timer
-    #
-
-    def start_joy_publisher(self):
-        """Setup joy publisher and start main publisher loop."""
-        self.pub = self.rospy.Publisher('joy', Joy, queue_size=10)
-        self.timer = self.rospy.Timer(self.rospy.Duration(1.0/float(self.hz)), self.publish_joy_msg)
-
-    def publish_joy_msg(self, event):
-        """Main publisher loop."""
-        joy = Joy()
-        joy.header.stamp = rospy.Time.now()
-        joy.axes = [float(p) - float(n) for p, n in zip(self.positive_axes_states, self.negative_axes_states)]
-        joy.buttons = self.button_states
-        self.pub.publish(joy)
+    def publishJoy(self, event):
+        self.joy.axes = self.pos_axes_states - self.neg_axes_states
+        self.pubs['output'].publish(self.addTimeStampToMsg(self.joy))
 
 
 if __name__ == '__main__':
-    node = Node()
-    node.setup_keyboard_reader()
-    node.start_joy_publisher()
-    node.spin()
+    Node().spin()
