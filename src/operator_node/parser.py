@@ -15,5 +15,6 @@ class ParseInterfaceLog:
         self.t = data[0, :].flatten()
         self.h = data[1:, :]
 
-    def interpolate(self):
-        return interp1d(self.t, self.h, **interpolate_config)
+    def interpolate(self, t):
+        h_fun = interp1d(self.t, self.h, **interpolate_config)
+        return h_fun(t)
