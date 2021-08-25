@@ -3,7 +3,7 @@
 
 class LoggerNode
 {
-  
+
 private:
 
   double window_duration;
@@ -12,7 +12,7 @@ private:
   std_msgs::Float64MultiArray msgout;
 
 public:
-  
+
   LoggerNode(int argc, char **argv);
   ~LoggerNode();
   void updateLog(const std_msgs::Float64MultiArray::ConstPtr& msg);
