@@ -18,3 +18,6 @@ class ParseInterfaceLog:
     def interpolate(self, t):
         h_fun = interp1d(self.t, self.h, **interpolate_config)
         return h_fun(t)
+
+    def time_now(self):
+        return self.t[-1]
