@@ -24,5 +24,5 @@ class ParseInterfaceLog:
         return h_fun(t)
 
 
-    def time_now(self):
+    def t_now(self):
         return self.t[-1]
