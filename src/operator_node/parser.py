@@ -26,3 +26,7 @@ class ParseInterfaceLog:
 
     def t_now(self):
         return self.t[-1]
+
+
+    def h_now(self):
+        return self.h[:, -1]
