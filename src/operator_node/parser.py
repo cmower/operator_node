@@ -17,11 +17,11 @@ class ParseInterfaceLog:
         data = numpy.array(msg.data).reshape(3, len(msg.data)//3, order='F')
         self.t = data[0, :].flatten()
         self.h = data[1:, :]
+        self.h_fun = interp1d(self.t, self.h, **interpolate_config)
 
 
     def interpolate(self, t):
-        h_fun = interp1d(self.t, self.h, **interpolate_config)
-        return h_fun(t)
+        return self.h_fun(t)
 
 
     def t_now(self):
