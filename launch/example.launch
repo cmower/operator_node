@@ -1,7 +1,7 @@
 <launch>
 
   <!-- Parameters -->
-  <param name="window_duration" type="double" value="1.0"/>
+  <param name="window_duration" type="double" value="3.0"/>
 
   <!-- Publish joystick at ~120Hz -->
   <node pkg="joy" name="joy_node" type="joy_node">
@@ -27,5 +27,8 @@
 
   <!-- Log previous 1 second window of operator signals -->
   <node pkg="operator_node" name="logger" type="interface_logger_node" output="screen"/>
+
+  <!-- Visualize -->
+  <node pkg="operator_node" name="visualizer" type="operator_interface_logger_visualizer_node.py" output="screen"/>
 
 </launch>
