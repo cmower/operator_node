@@ -18,7 +18,7 @@ class Node:
         # Setup screen
         config = {
             'caption': 'Operator interface logger visualization',
-            'width': 800,
+            'width': 800+20+600-40,
             'height': 600,
             'background_color': 'darkslateblue',
             'windows': {
@@ -32,9 +32,20 @@ class Node:
                     'tp': 4.0,
                     'y_lo': -0.04,
                     'y_up': 0.04,
-                    'n': 500,
+                    'n': 200,
                     'show_axis': True,
                     'axis_width': 3,
+                },
+                'joy': {
+                    'type': 'Joystick',
+                    'origin': (40+800-40, 20),
+                    'width': 600-40,
+                    'height': 600-40,
+                    'background_color': 'white',
+                    'joy_color': 'darkgrey',
+                    'flip_a0': True,
+                    'flip_a1': False,
+                    'joy_tip_color': 'red',
                 }
             }
         }
@@ -62,8 +73,11 @@ class Node:
         if self.window is not None:
             self.screen.windows['vis'].plot_line(self.window.t-self.window.t_now(), self.window.h[0,:], 'blue', 3)
             self.screen.windows['vis'].plot_line(self.window.t-self.window.t_now(), self.window.h[1,:], 'red', 3)
-            self.screen.windows['vis'].plot_point(0, self.window.h_now()[0], 'blue', 10)
-            self.screen.windows['vis'].plot_point(0, self.window.h_now()[1], 'red', 10)
+            h_now = self.window.h_now()
+            self.screen.windows['vis'].plot_point(0, h_now[0], 'blue', 10)
+            self.screen.windows['vis'].plot_point(0, h_now[1], 'red', 10)
+            axes = h_now/0.04  # see example.launch
+            self.screen.windows['joy'].draw(axes)
         self.screen.final()
         self.clock.tick(self.hz)
         return running
