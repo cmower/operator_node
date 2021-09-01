@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import rospy
 import pygame
 from std_msgs.msg import Float64MultiArray
