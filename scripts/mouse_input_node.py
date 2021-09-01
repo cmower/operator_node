@@ -59,7 +59,7 @@ def main():
     screen = Screen(config)
     clock = pygame.time.Clock()
     path = None
-    hz = 50
+    hz = 100
     user_interating = False
     all_colors = list(pygame.colordict.THECOLORS.keys())
 
@@ -114,7 +114,7 @@ def main():
                     screen.windows['robotenv'].convert_scalar(0.01),
                 )
             screen.final()
-            clock.tick(hz)
+            clock.tick_busy_loop(hz)
 
     except KeyboardInterrupt:
         rospy.logwarn('user quit mouse_input_node.py')
