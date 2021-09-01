@@ -6,10 +6,14 @@ Nodes:
 * `isometric_node`
 * `joy_remap_node`
 * `interface_logger_node`
-* `operator_interface_logger_visualizer_node.py`, requires [cmower/pygame_teleop](https://github.com/cmower/pygame_teleop).
+* `operator_interface_logger_visualizer_node.py`
 * `mouse_input_node.py`
 
 See `launch/` for an example.
+
+## Requirements
+
+* [cmower/pygame_teleop](https://github.com/cmower/pygame_teleop)
 
 ## Install
 
