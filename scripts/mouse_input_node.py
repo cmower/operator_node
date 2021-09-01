@@ -60,7 +60,7 @@ def main():
     clock = pygame.time.Clock()
     path = None
     hz = 100
-    user_interating = False
+    user_interacting = False
     all_colors = list(pygame.colordict.THECOLORS.keys())
 
     def random_path_color():
@@ -89,17 +89,17 @@ def main():
                     running = False
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    user_interating = True
+                    user_interacting = True
 
                 if event.type == pygame.MOUSEBUTTONUP:
                     path.header.stamp = rospy.Time.now()
                     pub_mouse_path.publish(path)
                     rospy.loginfo('sent mouse path on topic operator_node/mouse_position_path_after_interation')
-                    user_interating = False
+                    user_interacting = False
                     path = None
                     path_color = random_path_color()
 
-            if user_interating:
+            if user_interacting:
                 pub_mouse_int.publish(msg)
                 if path is None:
                     path = Path()
@@ -107,7 +107,7 @@ def main():
 
             screen.reset()
             screen.windows['robotenv'].robots['robot1'].draw(pos)
-            if draw and user_interating:
+            if draw and user_interacting:
                 screen.windows['robotenv'].static_circle(
                     path_color,
                     screen.windows['robotenv'].convert_position(pos),
