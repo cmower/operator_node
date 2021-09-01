@@ -7,9 +7,20 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   std_msgs
   joy
+  message_generation
   )
 
 catkin_python_setup()
+
+add_service_files(
+  FILES
+  ShutdownOperatorNode.srv
+  )
+
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+  )
 
 catkin_package()
 
