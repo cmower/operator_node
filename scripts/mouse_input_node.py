@@ -5,6 +5,7 @@ import random
 from geometry_msgs.msg import PoseStamped
 from nav_msgs.msg import Path
 from pygame_teleop.screen import Screen
+from operator_node.srv import ShutdownOperatorNode, ShutdownOperatorNodeResponse
 
 
 """
@@ -17,8 +18,16 @@ pressed the mouse position is published.
 
 """
 
+running = True
+
+def handle_shutdown_operator_node(req):
+    global running
+    running = False
+    return ShutdownOperatorNodeResponse(0)
 
 def main():
+
+    global running
 
     # Initialize ROS
     rospy.init_node('mouse_input_node')
@@ -27,6 +36,7 @@ def main():
     pub_mouse_cts = rospy.Publisher('operator_node/mouse_position_continuous', PoseStamped, queue_size=10)
     pub_mouse_int = rospy.Publisher('operator_node/mouse_position_on_interaction', PoseStamped, queue_size=10)
     pub_mouse_path = rospy.Publisher('operator_node/mouse_position_path_after_interation', Path, queue_size=10)
+    rospy.Service('shutdown_operator_node', ShutdownOperatorNode, handle_shutdown_operator_node)
 
     # Setup
     config = {
@@ -68,8 +78,6 @@ def main():
         return all_colors[ridx]
 
     path_color = random_path_color()
-
-    running = True
 
     # Main loop
     try:
@@ -119,6 +127,7 @@ def main():
     except KeyboardInterrupt:
         rospy.logwarn('user quit mouse_input_node.py')
 
+    rospy.loginfo('shutting down mouse input node')
     pygame.quit()
 
 
