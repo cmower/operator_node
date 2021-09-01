@@ -23,7 +23,7 @@ def main():
     # Initialize ROS
     rospy.init_node('mouse_input_node')
     draw = rospy.get_param('~draw', True)
-    # TODO: give use ability to specify size of screen and robot env using ROS parameters
+    # TODO: give user ability to specify size of screen and its scale with real world using ROS parameters
     pub_mouse_cts = rospy.Publisher('operator_node/mouse_position_continuous', PoseStamped, queue_size=10)
     pub_mouse_int = rospy.Publisher('operator_node/mouse_position_on_interaction', PoseStamped, queue_size=10)
     pub_mouse_path = rospy.Publisher('operator_node/mouse_position_path_after_interation', Path, queue_size=10)
