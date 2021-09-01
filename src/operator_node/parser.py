@@ -37,7 +37,7 @@ class ParseInterfaceLog(Parser):
         return self.h[:, -1]
 
 
-class ParseMousePath(Parser)
+class ParseMousePath(Parser):
 
 
     def __init__(self, msg):
