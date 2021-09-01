@@ -28,5 +28,6 @@ target_link_libraries(interface_logger_node ${catkin_LIBRARIES})
 
 catkin_install_python(PROGRAMS
   scripts/operator_interface_logger_visualizer_node.py
+  scripts/mouse_input_node.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   )
