@@ -84,8 +84,13 @@ class Node:
 
 
     def spin(self):
-        while self.main_loop():
+        try:
+            while self.main_loop():
+                pass
+        except:
             pass
+        finally:
+            pygame.quit()
 
 
 def main():
