@@ -15,7 +15,7 @@
   <node pkg="operator_node" name="joy_remap_node" type="joy_remap_node">
     <remap from="joy_in" to="joy/raw"/>
     <remap from="joy_out" to="joy"/>
-    <param name="hz" type="int" value="100"/>
+    <param name="hz" type="int" value="100"/> <!-- TODO: node uses global parameter sampling_rate NOT local hz parameter -->
   </node>
 
   <!-- Map joystick messages to operator signal -->
