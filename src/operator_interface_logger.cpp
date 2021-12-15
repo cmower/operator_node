@@ -1,6 +1,21 @@
 #include "ros/ros.h"
 #include "std_msgs/Float64MultiArray.h"
 
+/**
+
+operator_interface_logger
+
+This node collects a log of the previous N operator signals and
+publishes this including timestamps as a flattened Float64MultiArray
+message. The window duration is given in time (seconds).
+
+You can think of the log as being a (1+Nd)-by-N array that has been
+flattened by columns. N is the number of signals in the current
+buffer.  Nd is the number of dimensions of the operator signal, and
+the 1 is for the time stamp.
+
+ **/
+
 class LoggerNode
 {
 
@@ -37,7 +52,7 @@ void LoggerNode::updateLog(const std_msgs::Float64MultiArray::ConstPtr& msg)
 {
 
   // Get current time
-  const int num_axes = msg->data.size();
+  const int num_axes = msg->data.size(); // assumes this is the same for all operator signals on this topic
   const double tc = ros::Time::now().toSec();
 
   // Append data

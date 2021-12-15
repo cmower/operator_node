@@ -1,6 +1,15 @@
 #include "ros/ros.h"
 #include "sensor_msgs/Joy.h"
 
+/**
+
+Recieves joy messages from a joy_node and republishes at a given
+sampling frequency. Sometimes I have noticed the sampling frequency of
+a joy_node does not always match the observed frequency (the
+difference is typically fairly small but significant).
+
+ **/
+
 class RemapNode
 {
 
@@ -64,6 +73,7 @@ void RemapNode::updateJoy(const ros::TimerEvent& event)
   // Update time stamp and publish
   msg_out.header.stamp = ros::Time::now();
   pub.publish(msg_out);
+
 }
 
 void RemapNode::spin()
