@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import rospy
 import pygame
+import numpy
 import random
 from geometry_msgs.msg import PoseStamped
 from nav_msgs.msg import Path
@@ -121,6 +122,7 @@ def main():
                     screen.windows['robotenv'].convert_position(pos),
                     screen.windows['robotenv'].convert_scalar(0.01),
                 )
+            screen.windows['robotenv'].rectangle('red', (20, 20), 40, 40, -45)
             screen.final()
             clock.tick_busy_loop(hz)
 
