@@ -1,5 +1,5 @@
 // BSD 2-Clause License
-// Copyright (c) 2021, Christopher E. Mower
+// Copyright (c) 2022, Christopher E. Mower
 // All rights reserved.
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -23,13 +23,23 @@
 #include "std_msgs/Float64MultiArray.h"
 #include <math.h>
 #include <vector>
+#include <ros/console.h>
 
-class OperatorNode
+/**
+
+Reads Joy messages, and scales the axes of interest such that result
+is isometric.
+
+ **/
+
+
+
+class Node
 {
 
 private:
 
-  double max_velocity;
+  double scale;
   std::vector<int> axis;
   std::vector<double> directions;
   ros::Publisher pub;
@@ -37,83 +47,81 @@ private:
 
 public:
 
-  OperatorNode(int argc, char **argv);
-  ~OperatorNode();
-
-  std::vector<double> normalize(std::vector<double> &h);
+  Node(int argc, char **argv);
+  ~Node();
   void callback(const sensor_msgs::Joy::ConstPtr& msgin);
 
 };
 
-OperatorNode::OperatorNode(int argc, char **argv)
+
+Node::Node(int argc, char **argv)
 {
 
   // Setup
-  ros::init(argc, argv, "operator_node");
+  ros::init(argc, argv, "operator_node_isometric_node");
 
   // Get parameter
   ros::NodeHandle nh_param("~");
   nh_param.param("axis", axis, axis);
   nh_param.param("directions", directions, directions);
-  nh_param.param<double>("max_velocity", max_velocity, 1.0);
+  nh_param.param<double>("scale", scale, 1.0);
 
   // Setup publisher and subscriber
   ros::NodeHandle nh;
   pub = nh.advertise<std_msgs::Float64MultiArray>("operator_node/signal", 1000);
-  sub = nh.subscribe("joy", 1000, &OperatorNode::callback, this);
+  sub = nh.subscribe("joy", 1000, &Node::callback, this);
+
+  ROS_INFO("operator node: isometric node initialized.");
 
 }
 
-OperatorNode::~OperatorNode()
+
+Node::~Node()
 {
   sub.shutdown();
 }
 
-void OperatorNode::callback(const sensor_msgs::Joy::ConstPtr& msgin)
+
+void Node::callback(const sensor_msgs::Joy::ConstPtr& msgin)
 {
 
-  // Get data
+  // Specify variables
   std::vector<double> h(axis.size());
+  double hnorm=0.0;
+  const double output_scale;
+  std_msgs::Float64MultiArray msgout;
+
+  // Get data
   for (int i=0; i<axis.size(); ++i) {
     h[i] = directions[i]*msgin->axes[axis[i]];
   }
 
+  // Compute ||h|| and scale=max_vel*min(||h||, 1)/||h||
+  for (int i=0; i<h.size(); ++i)
+    hnorm += h[i]*h[i];
+  hnorm = std::sqrt(hnorm);
+  output_scale = scale*std::min(hnorm, 1.0)/hnorm;
+
+  // Compute hnorm
+  if (hnorm > 0) {
+    for (int i=0; i<h.size(); ++i)
+      hnorm[i] = scale*h[i];
+  }
+  else {
+    std::fill(hnorm.begin(), hnorm.end(), 0);
+  }
+
   // Pack and publish message
-  std_msgs::Float64MultiArray msgout;
-  std::vector<double> hnorm = normalize(h);
   msgout.data.clear();
   msgout.data.insert(msgout.data.end(), hnorm.begin(), hnorm.end());
   pub.publish(msgout);
 
 }
 
-std::vector<double> OperatorNode::normalize(std::vector<double> &h)
-{
-
-  std::vector<double> hout(h.size());
-
-  // Compute ||h|| and scale=max_vel*min(||h||, 1)/||h||
-  double hnorm=0.0;
-  for (int i=0; i<h.size(); ++i)
-    hnorm += h[i]*h[i];
-  hnorm = std::sqrt(hnorm);
-  const double scale = max_velocity*std::min(hnorm, 1.0)/hnorm;
-
-  // Compute hout
-  if (hnorm > 0) {
-    for (int i=0; i<h.size(); ++i)
-      hout[i] = scale*h[i];
-  }
-  else {
-    std::fill(hout.begin(), hout.end(), 0);
-  }
-
-  return hout;
-}
 
 int main(int argc, char **argv)
 {
-  OperatorNode operator_node = OperatorNode(argc, argv);
+  Node node = Node(argc, argv);
   ros::spin();
   return 0;
 }

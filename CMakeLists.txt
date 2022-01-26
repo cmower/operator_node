@@ -28,7 +28,7 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
   )
 
-add_executable(isometric_node src/isometric.cpp)
+add_executable(isometric_node src/isometric_node.cpp)
 target_link_libraries(isometric_node ${catkin_LIBRARIES})
 
 add_executable(joy_remap_node src/joy_remap.cpp)
