@@ -2,7 +2,7 @@ import numpy
 
 
 def reconstruct_interface_log_msg(msg, Nd):
-    """Reconstruct the interface log from a Float64MultiArray message
+    """Reconstruct the interface log from a std_msgs/Float64MultiArray message
 
 Syntax
 ------
@@ -16,7 +16,7 @@ msg [std_msgs/Float64Array]
   ROS message recieved from an operator_interface_logger node.
 
 Nd [int]
-  Number of dimensions of the operator signal.
+  Number of dimensions for the operator signal.
 
 Output
 ------
