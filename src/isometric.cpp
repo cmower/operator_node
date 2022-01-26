@@ -31,7 +31,7 @@ private:
 
   double max_velocity;
   std::vector<int> axis;
-  std::vector<double> directions;  
+  std::vector<double> directions;
   ros::Publisher pub;
   ros::Subscriber sub;
 
@@ -52,13 +52,13 @@ OperatorNode::OperatorNode(int argc, char **argv)
   ros::init(argc, argv, "operator_node");
 
   // Get parameter
-  ros::NodeHandle nh_param("~");  
+  ros::NodeHandle nh_param("~");
   nh_param.param("axis", axis, axis);
-  nh_param.param("directions", directions, directions);  
+  nh_param.param("directions", directions, directions);
   nh_param.param<double>("max_velocity", max_velocity, 1.0);
-  
+
   // Setup publisher and subscriber
-  ros::NodeHandle nh;  
+  ros::NodeHandle nh;
   pub = nh.advertise<std_msgs::Float64MultiArray>("operator_node/signal", 1000);
   sub = nh.subscribe("joy", 1000, &OperatorNode::callback, this);
 
@@ -77,7 +77,7 @@ void OperatorNode::callback(const sensor_msgs::Joy::ConstPtr& msgin)
   for (int i=0; i<axis.size(); ++i) {
     h[i] = directions[i]*msgin->axes[axis[i]];
   }
-    
+
   // Pack and publish message
   std_msgs::Float64MultiArray msgout;
   std::vector<double> hnorm = normalize(h);
@@ -107,7 +107,7 @@ std::vector<double> OperatorNode::normalize(std::vector<double> &h)
   else {
     std::fill(hout.begin(), hout.end(), 0);
   }
-  
+
   return hout;
 }
 
