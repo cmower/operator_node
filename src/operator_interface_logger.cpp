@@ -58,7 +58,8 @@ LoggerNode::LoggerNode(int argc, char **argv)
 {
   ros::init(argc, argv, "interface_logger_node");
   ros::NodeHandle nh;
-  nh.getParam("window_duration", window_duration);
+  ros::NodeHandle nh_param("~");
+  nh_param.param("window_duration", window_duration);
   pub = nh.advertise<std_msgs::Float64MultiArray>("operator_node/window", 1000);
   sub = nh.subscribe("operator_node/signal", 1000, &LoggerNode::updateLog, this);
 }
