@@ -23,7 +23,7 @@ import sys
 import rospy
 import pygame
 from std_msgs.msg import Int64MultiArray, UInt8
-
+from sensor_msgs.msg import Joy
 
 """
 Button ID:
@@ -47,20 +47,25 @@ class Node:
         rospy.init_node('mouse_input_node')
 
         # Get params
-        width = rospy.get_param('~width', 500)
+        self.width = rospy.get_param('~width', 500)
+        self.norm = 1.0/float(self.width-1)
 
         # Setup publishers
         self.mouse_position_pub = rospy.Publisher('mouse/position', Int64MultiArray, queue_size=10)
         self.mouse_button_down_event_pub = rospy.Publisher('mouse/buttondown', UInt8, queue_size=10)
         self.mouse_button_up_event_pub = rospy.Publisher('mouse/buttonup', UInt8, queue_size=10)
+        self.mouse_joy_pub = rospy.Publisher('mouse/joy', Joy, queue_size=10)
 
         # Setup pygame window
         pygame.init()
-        self.screen = pygame.display.set_mode((width, width))
+        self.screen = pygame.display.set_mode((self.width, self.width))
         pygame.display.set_caption('Mouse Input')
         self.clock = pygame.time.Clock()
         self.screen.fill(pygame.Color('white'))
         self.running = True
+        self.msg = Joy()
+        self.msg.axes = [0.0]*2
+        self.msg.buttons = [0]*5
 
         rospy.loginfo('initialized mouse input node')
 
@@ -76,11 +81,19 @@ class Node:
 
                 elif event.type == pygame.MOUSEBUTTONUP:
                     self.mouse_button_up_event_pub.publish(UInt8(data=event.button))
+                    self.msg.buttons[event.button-1] = 0
 
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     self.mouse_button_down_event_pub.publish(UInt8(data=event.button))
+                    self.msg.buttons[event.button-1] = 1
 
-            self.mouse_position_pub.publish(Int64MultiArray(data=pygame.mouse.get_pos()))
+            mouse_pos = pygame.mouse.get_pos()
+            self.mouse_position_pub.publish(Int64MultiArray(data=mouse_pos))
+            self.msg.axes = [self.norm*float(m) for m in mouse_pos]
+            self.msg.header.stamp = rospy.Time.now()
+            self.mouse_joy_pub.publish(self.msg)
+
+            # Tick pygame
             pygame.display.flip()
             self.clock.tick_busy_loop(self.HZ)
 
