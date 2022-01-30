@@ -34,7 +34,7 @@ class Node:
     def __init__(self):
 
         # Init ros node
-        rospy.init_node('Campeau2019Intuitive_node')
+        rospy.init_node('adaptive_orientation_node')
 
         # Setup tf interface
         self.tfBuffer = tf2_ros.Buffer()
