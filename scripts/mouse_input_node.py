@@ -48,7 +48,6 @@ class Node:
 
         # Get params
         width = rospy.get_param('~width', 500)
-        height = rospy.get_param('~height', 500)
 
         # Setup publishers
         self.mouse_position_pub = rospy.Publisher('mouse/position', Int64MultiArray, queue_size=10)
@@ -57,7 +56,7 @@ class Node:
 
         # Setup pygame window
         pygame.init()
-        self.screen = pygame.display.set_mode((width, height))
+        self.screen = pygame.display.set_mode((width, width))
         pygame.display.set_caption('Mouse Input')
         self.clock = pygame.time.Clock()
         self.screen.fill(pygame.Color('white'))
