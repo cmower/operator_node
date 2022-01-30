@@ -42,7 +42,7 @@ class Node:
         else:
             rospy.logerr('length of scales parameter is incorrect, got %d, expected %d or 1', len(self.scale), len(self.axes))
             sys.exit(0)
-        rospy.Subscriber('joy', Joy, self.callback):
+        rospy.Subscriber('joy', Joy, self.callback)
 
 
     def callback(self, msg):
