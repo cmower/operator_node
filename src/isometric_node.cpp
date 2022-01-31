@@ -88,7 +88,6 @@ void Node::callback(const sensor_msgs::Joy::ConstPtr& msgin)
   // Specify variables
   std::vector<double> h(axis.size());
   double hnorm=0.0;
-  const double output_scale;
   std_msgs::Float64MultiArray msgout;
 
   // Get data
@@ -100,20 +99,20 @@ void Node::callback(const sensor_msgs::Joy::ConstPtr& msgin)
   for (int i=0; i<h.size(); ++i)
     hnorm += h[i]*h[i];
   hnorm = std::sqrt(hnorm);
-  output_scale = scale*std::min(hnorm, 1.0)/hnorm;
+  const double output_scale = scale*std::min(hnorm, 1.0)/hnorm;
 
   // Compute hnorm
   if (hnorm > 0) {
     for (int i=0; i<h.size(); ++i)
-      hnorm[i] = scale*h[i];
+      h[i] = output_scale*h[i];
   }
   else {
-    std::fill(hnorm.begin(), hnorm.end(), 0);
+    std::fill(h.begin(), h.end(), 0);
   }
 
   // Pack and publish message
   msgout.data.clear();
-  msgout.data.insert(msgout.data.end(), hnorm.begin(), hnorm.end());
+  msgout.data.insert(msgout.data.end(), h.begin(), h.end());
   pub.publish(msgout);
 
 }

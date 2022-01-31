@@ -7,20 +7,11 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   std_msgs
   joy
+  keyboard
   message_generation
   )
 
 catkin_python_setup()
-
-add_service_files(
-  FILES
-  ShutdownOperatorNode.srv
-  )
-
-generate_messages(
-  DEPENDENCIES
-  std_msgs
-  )
 
 catkin_package()
 
@@ -38,7 +29,8 @@ add_executable(interface_logger_node src/operator_interface_logger.cpp)
 target_link_libraries(interface_logger_node ${catkin_LIBRARIES})
 
 catkin_install_python(PROGRAMS
-  scripts/operator_interface_logger_visualizer_node.py
+  scripts/scale_node.py
   scripts/mouse_input_node.py
+  scripts/keyboard_to_joy.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   )

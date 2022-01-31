@@ -1,0 +1,18 @@
+<launch>
+
+  <node pkg="keyboard" name="keyboard" type="keyboard"/>
+
+  <node pkg="operator_node" name="keyboard_to_joy" type="keyboard_to_joy.py">
+    <param name="buttons" type="str" value="a s d"/>
+    <rosparam param="axes">[
+    "LEFT RIGHT",
+    "DOWN UP"
+    ]</rosparam>
+  </node>
+
+  <node pkg="operator_node" name="keyboard_scale" type="scale_node.py">
+    <param name="axes" type="str" value="0 1"/>
+    <param name="scale" type="str" value="1.0"/>
+  </node>
+
+</launch>
