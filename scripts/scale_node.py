@@ -34,11 +34,12 @@ class Node:
         self.pub = rospy.Publisher('operator_node/signal', Float64MultiArray, queue_size=10)
         axes = rospy.get_param('~axes')
         self.axes = [int(a) for a in axes.split(' ')]
-        scale = rospy.get_param('~scale').split(' ')
+        scale = rospy.get_param('~scale', ['1.0']*len(self.axes)).split(' ')
         if len(scale) == 1:
-            self.scale = np.array(scale*len(self.axes))
+            s = float(scale[0])
+            self.scale = s*np.ones(len(self.axes))
         elif len(scale) == len(self.axes):
-            self.scale = np.array(scale)
+            self.scale = np.array([float(s) for s in scale])
         else:
             rospy.logerr('length of scales parameter is incorrect, got %d, expected %d or 1', len(self.scale), len(self.axes))
             sys.exit(0)
