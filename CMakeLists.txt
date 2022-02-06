@@ -7,6 +7,8 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   std_msgs
   joy
+  tf2
+  tf2_ros
   keyboard
   message_generation
   )
