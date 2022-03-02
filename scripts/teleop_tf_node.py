@@ -19,52 +19,32 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-import sys
 import rospy
 import numpy as np
-from sensor_msgs.msg import Joy
 from std_msgs.msg import Float64MultiArray
-
+from rpbi.tf_interface import TfInterface
 
 class Node:
 
+    hz = 100
+    dt = 1.0/float(hz)
 
     def __init__(self):
-
-        # Init ros node
-        rospy.init_node('scale_node')
-
-        # Setup publisher
-        self.pub = rospy.Publisher('operator_node/signal', Float64MultiArray, queue_size=10)
-
-        # Get axes
-        self.axes = [int(a) for a in rospy.get_param('~axes').split(' ')]
-        naxes = len(self.axes)
-
-        # Get scale
-        scale_ = rospy.get_param('~scale', [1.0]*naxes)
-        if isinstance(scale_, (float, int)):
-            scale = [float(scale_)]*naxes
-        elif isinstance(scale_, str):
-            scale = [float(s) for s in scale_.split(' ')]
-            if len(scale) == 1:
-                scale = [scale]*naxes
-        elif isinstance(scale_, (list, tuple)):
-            scale = [float(s) for s in scale_]
-        else:
-            raise ValueError(f'Parameter ~scale type ({type(scale_)}) is not recognized!')
-
-        self.scale = np.array(scale)
-
-        # Setup ros subscriber
-        rospy.Subscriber('joy', Joy, self.callback)
-
+        rospy.init_node('teleop_tf_node')
+        self.tf = TfInterface()
+        self.parent_frame = rospy.get_param('~parent_frame', 'world')
+        self.child_frame = rospy.get_param('~child_frame')
+        self.h = np.zeros(3)
+        self.pos = np.zeros(3)
+        rospy.Subscriber('operator_node/signal', Float64MultiArray, self.callback)
+        rospy.Timer(rospy.Duration(self.dt), self.main_loop)
 
     def callback(self, msg):
-        axes = np.array(msg.axes)
-        signal = self.scale*axes[self.axes]
-        self.pub.publish(Float64MultiArray(data=signal.tolist()))
+        self.h[:3] = np.array(msg.data[:3])
 
+    def main_loop(self, event):
+        self.pos += self.dt*self.h
+        self.tf.set_tf(self.parent_frame, self.child_frame, self.pos)
 
     def spin(self):
         rospy.spin()
