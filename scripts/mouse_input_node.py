@@ -1,134 +1,109 @@
 #!/usr/bin/env python3
+# BSD 2-Clause License
+# Copyright (c) 2022, Christopher E. Mower
+# All rights reserved.
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+# 1. Redistributions of source code must retain the above copyright notice, this
+#    list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+#    this list of conditions and the following disclaimer in the documentation
+#    and/or other materials provided with the distribution.
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+import sys
 import rospy
 import pygame
-import random
-from geometry_msgs.msg import PoseStamped
-from nav_msgs.msg import Path
-from pygame_teleop.screen import Screen
-from operator_node.srv import ShutdownOperatorNode, ShutdownOperatorNodeResponse
-
+from std_msgs.msg import Int64MultiArray, UInt8
+from sensor_msgs.msg import Joy
 
 """
-
-Creates a window that allows the user to draw paths.  The path between
-mouse button down and up events is recorded and published as a
-nav_msg/Path message. The mouse position is continuously streamed as a
-geometry_msgs/PoseStamped. Additionally, while the mouse button is
-pressed the mouse position is published.
-
+Button ID:
+1 - left click
+2 - middle click
+3 - right click
+4 - scroll up
+5 - scroll down
 """
 
-running = True
 
-def handle_shutdown_operator_node(req):
-    global running
-    running = False
-    return ShutdownOperatorNodeResponse(0)
+class Node:
+
+
+    HZ = 100
+
+
+    def __init__(self):
+
+        # Setup node
+        rospy.init_node('mouse_input_node')
+
+        # Get params
+        self.width = rospy.get_param('~width', 500)
+        self.norm = 1.0/float(self.width-1)
+
+        # Setup publishers
+        self.mouse_position_pub = rospy.Publisher('mouse/position', Int64MultiArray, queue_size=10)
+        self.mouse_button_down_event_pub = rospy.Publisher('mouse/buttondown', UInt8, queue_size=10)
+        self.mouse_button_up_event_pub = rospy.Publisher('mouse/buttonup', UInt8, queue_size=10)
+        self.mouse_joy_pub = rospy.Publisher('mouse/joy', Joy, queue_size=10)
+
+        # Setup pygame window
+        pygame.init()
+        self.screen = pygame.display.set_mode((self.width, self.width))
+        pygame.display.set_caption('Mouse Input')
+        self.clock = pygame.time.Clock()
+        self.screen.fill(pygame.Color('white'))
+        self.running = True
+        self.msg = Joy()
+        self.msg.axes = [0.0]*2
+        self.msg.buttons = [0]*5
+
+        rospy.loginfo('initialized mouse input node')
+
+
+    def spin(self):
+
+        while self.running:
+
+            for event in pygame.event.get():
+
+                if event.type == pygame.QUIT:
+                    self.running = False
+
+                elif event.type == pygame.MOUSEBUTTONUP:
+                    self.mouse_button_up_event_pub.publish(UInt8(data=event.button))
+                    self.msg.buttons[event.button-1] = 0
+
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    self.mouse_button_down_event_pub.publish(UInt8(data=event.button))
+                    self.msg.buttons[event.button-1] = 1
+
+            mouse_pos = pygame.mouse.get_pos()
+            self.mouse_position_pub.publish(Int64MultiArray(data=mouse_pos))
+            self.msg.axes = [self.norm*float(m) for m in mouse_pos]
+            self.msg.header.stamp = rospy.Time.now()
+            self.mouse_joy_pub.publish(self.msg)
+
+            # Tick pygame
+            pygame.display.flip()
+            self.clock.tick_busy_loop(self.HZ)
+
+        rospy.loginfo('shutting down mouse input node')
+        pygame.quit()
+        sys.exit(0)
+
 
 def main():
-
-    global running
-
-    # Initialize ROS
-    rospy.init_node('mouse_input_node')
-    draw = rospy.get_param('~draw', True)
-    # TODO: give user ability to specify size of screen and its scale with real world using ROS parameters
-    pub_mouse_cts = rospy.Publisher('operator_node/mouse_position_continuous', PoseStamped, queue_size=10)
-    pub_mouse_int = rospy.Publisher('operator_node/mouse_position_on_interaction', PoseStamped, queue_size=10)
-    pub_mouse_path = rospy.Publisher('operator_node/mouse_position_path_after_interation', Path, queue_size=10)
-    rospy.Service('shutdown_operator_node', ShutdownOperatorNode, handle_shutdown_operator_node)
-
-    # Setup
-    config = {
-        'caption': 'Drawing example',
-        'width': 500,
-        'height': 500,
-        'background_color': 'darkslateblue',
-        'windows':{
-            'robotenv': {
-                'origin': (10, 10),
-                'width': 480,
-                'height': 480,
-                'background_color': 'white',
-                'type': 'RobotEnvironment',
-                'robotenv_width': 1.0,
-                'robotenv_height': 1.0,
-                'robotenv_origin_location': 'lower_left',
-                'show_origin': True,
-                'robots': {
-                    'robot1': {
-                        'show_path': False,
-                        'robot_radius': 0.025,
-                        'robot_color': 'black'
-                    }
-                }
-
-            }
-        }
-    }
-    screen = Screen(config)
-    clock = pygame.time.Clock()
-    path = None
-    hz = 100
-    user_interacting = False
-    all_colors = list(pygame.colordict.THECOLORS.keys())
-
-    def random_path_color():
-        ridx = random.randint(0, len(all_colors)-1)
-        return all_colors[ridx]
-
-    path_color = random_path_color()
-
-    # Main loop
-    try:
-
-        while running:
-
-            events = pygame.event.get()
-            pos = screen.windows['robotenv'].get_mouse_position()
-            msg = PoseStamped()
-            msg.header.stamp = rospy.Time.now()
-            msg.pose.position.x = pos[0]
-            msg.pose.position.y = pos[1]
-            pub_mouse_cts.publish(msg)
-
-            for event in events:
-                if event.type == pygame.QUIT:
-                    running = False
-
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    user_interacting = True
-
-                if event.type == pygame.MOUSEBUTTONUP:
-                    path.header.stamp = rospy.Time.now()
-                    pub_mouse_path.publish(path)
-                    rospy.loginfo('sent mouse path on topic operator_node/mouse_position_path_after_interation')
-                    user_interacting = False
-                    path = None
-                    path_color = random_path_color()
-
-            if user_interacting:
-                pub_mouse_int.publish(msg)
-                if path is None:
-                    path = Path()
-                path.poses.append(msg)
-
-            screen.reset()
-            screen.windows['robotenv'].robots['robot1'].draw(pos)
-            if draw and user_interacting:
-                screen.windows['robotenv'].static_circle(
-                    path_color,
-                    screen.windows['robotenv'].convert_position(pos),
-                    screen.windows['robotenv'].convert_scalar(0.01),
-                )
-            screen.final()
-            clock.tick_busy_loop(hz)
-
-    except KeyboardInterrupt:
-        rospy.logwarn('user quit mouse_input_node.py')
-
-    rospy.loginfo('shutting down mouse input node')
-    pygame.quit()
+    Node().spin()
 
 
 if __name__ == '__main__':

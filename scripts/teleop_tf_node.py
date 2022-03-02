@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # BSD 2-Clause License
 # Copyright (c) 2022, Christopher E. Mower
 # All rights reserved.
@@ -18,39 +19,40 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+import rospy
+import numpy as np
+from std_msgs.msg import Float64MultiArray
+from rpbi.tf_interface import TfInterface
 
-import numpy
+class Node:
+
+    hz = 100
+    dt = 1.0/float(hz)
+
+    def __init__(self):
+        rospy.init_node('teleop_tf_node')
+        self.tf = TfInterface()
+        self.parent_frame = rospy.get_param('~parent_frame', 'world')
+        self.child_frame = rospy.get_param('~child_frame')
+        self.h = np.zeros(3)
+        self.pos = np.zeros(3)
+        rospy.Subscriber('operator_node/signal', Float64MultiArray, self.callback)
+        rospy.Timer(rospy.Duration(self.dt), self.main_loop)
+
+    def callback(self, msg):
+        self.h[:3] = np.array(msg.data[:3])
+
+    def main_loop(self, event):
+        self.pos += self.dt*self.h
+        self.tf.set_tf(self.parent_frame, self.child_frame, self.pos)
+
+    def spin(self):
+        rospy.spin()
 
 
-def reconstruct_interface_log_msg(msg, Nd):
-    """Reconstruct the interface log from a std_msgs/Float64MultiArray message
+def main():
+    Node().spin()
 
-Syntax
-------
 
-t, h = reconstruct_interface_log_msg(msg)
-
-Input
------
-
-msg [std_msgs/Float64Array]
-  ROS message recieved from an operator_interface_logger node.
-
-Nd [int]
-  Number of dimensions for the operator signal.
-
-Output
-------
-
-t [numpy.ndarray]
-  An N-array of time stamps.
-
-h [numpy.ndarray]
-  An Nd-by-N array containing N operator signals.
-
-    """
-    Nd1 = Nd+1  # operator signals and time
-    data = numpy.array(msg.data).reshape(Nd1, len(msg.data)//(Nd1), order='F')
-    t = data[0, :]
-    h = data[1:, :]
-    return t, h
+if __name__ == '__main__':
+    main()
