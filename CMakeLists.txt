@@ -35,5 +35,6 @@ catkin_install_python(PROGRAMS
   scripts/mouse_input_node.py
   scripts/keyboard_to_joy.py
   scripts/Campeau2019Intuitive_node.py
+  scripts/teleop_tf_node.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   )
