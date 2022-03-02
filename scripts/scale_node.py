@@ -30,19 +30,33 @@ class Node:
 
 
     def __init__(self):
+
+        # Init ros node
         rospy.init_node('scale_node')
+
+        # Setup publisher
         self.pub = rospy.Publisher('operator_node/signal', Float64MultiArray, queue_size=10)
-        axes = rospy.get_param('~axes')
-        self.axes = [int(a) for a in axes.split(' ')]
-        scale = rospy.get_param('~scale', ['1.0']*len(self.axes)).split(' ')
-        if len(scale) == 1:
-            s = float(scale[0])
-            self.scale = s*np.ones(len(self.axes))
-        elif len(scale) == len(self.axes):
-            self.scale = np.array([float(s) for s in scale])
+
+        # Get axes
+        self.axes = [int(a) for a in rospy.get_param('~axes').split(' ')]
+        naxes = len(self.axes)
+
+        # Get scale
+        scale_ = rospy.get_param('~scale', [1.0]*naxes)
+        if isinstance(scale_, (float, int)):
+            scale = [float(scale_)]*naxes
+        elif isinstance(scale_, str):
+            scale = [float(s) for s in scale_.split(' ')]
+            if len(scale) == 1:
+                scale = [scale]*naxes
+        elif isinstance(scale_, (list, tuple)):
+            scale = [float(s) for s in scale_]
         else:
-            rospy.logerr('length of scales parameter is incorrect, got %d, expected %d or 1', len(self.scale), len(self.axes))
-            sys.exit(0)
+            raise ValueError(f'Parameter ~scale type ({type(scale_)}) is not recognized!')
+
+        self.scale = np.array(scale)
+
+        # Setup ros subscriber
         rospy.Subscriber('joy', Joy, self.callback)
 
 
