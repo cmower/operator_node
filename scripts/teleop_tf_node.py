@@ -21,30 +21,63 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import rospy
 import numpy as np
+import tf_conversions
+from std_srvs.srv import SetBool, SetBoolResponse
 from std_msgs.msg import Float64MultiArray
 from rpbi.tf_interface import TfInterface
 
 class Node:
-
-    hz = 100
-    dt = 1.0/float(hz)
 
     def __init__(self):
         rospy.init_node('teleop_tf_node')
         self.tf = TfInterface()
         self.parent_frame = rospy.get_param('~parent_frame', 'world')
         self.child_frame = rospy.get_param('~child_frame')
-        self.h = np.zeros(3)
-        self.pos = np.zeros(3)
-        rospy.Subscriber('operator_node/signal', Float64MultiArray, self.callback)
-        rospy.Timer(rospy.Duration(self.dt), self.main_loop)
+        hz = rospy.get_param('~hz', 100)
+        self.dt = 1.0/float(hz)
+        self.h = np.zeros(6)
+        self.pose = np.zeros(6)  # position + euler angles
+        self.timer = None
+        self.sub = None
+        rospy.Service('toggle_teleop_tf', SetBool, self.toggle_teleop_tf)
+
+    def toggle_teleop_tf(self, req):
+        if req.data:
+            success, message = self.start_teleop()
+        else:
+            success, message = self.stop_teleop()
+        return SetBoolResponse(message=message, success=success)
+
+    def start_teleop(self):
+        if (self.sub is None) and (self.timer is None):
+            self.sub = rospy.Subscriber('operator_node/signal', Float64MultiArray, self.callback)
+            self.timer = rospy.Timer(rospy.Duration(self.dt), self.main_loop)
+            success = True
+            message = 'started tf teleoperation node'
+        else:
+            success = False
+            message = 'user attempted to start tf teleoperation node, but it is already running!'
+            rospy.logerr(message)
+        return success, message
+
+    def stop_teleop(self):
+        if (self.sub is not None) and (self.timer is not None):
+            self.sub.unregister()
+            self.h = np.zeros(6)  # ensure no more motion
+            self.timer.shutdown()
+            success = True
+            message = 'stopped tf teleoperation node'
+        else:
+            success = False
+            message = 'user attempted to stop ttf teleoperation node, but it is not running!'
+        return success, message
 
     def callback(self, msg):
-        self.h[:3] = np.array(msg.data[:3])
+        self.h[:6] = np.array(msg.data[:6])
 
     def main_loop(self, event):
-        self.pos += self.dt*self.h
-        self.tf.set_tf(self.parent_frame, self.child_frame, self.pos)
+        self.pose += self.dt*self.h
+        self.tf.set_tf(self.parent_frame, self.child_frame, self.pose[:3], tf_conversions.transformations.quaternion_from_euler(self.pose[3], self.pose[4], self.pose[5]))
 
     def spin(self):
         rospy.spin()
