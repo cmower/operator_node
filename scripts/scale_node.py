@@ -19,60 +19,16 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-import sys
-import rospy
 import numpy as np
-from sensor_msgs.msg import Joy
-from std_msgs.msg import Float64MultiArray
+from operator_node.node import BasicOperatorNode, main
 
-
-class Node:
-
-
-    def __init__(self):
-
-        # Init ros node
-        rospy.init_node('scale_node')
-
-        # Setup publisher
-        self.pub = rospy.Publisher('operator_node/signal', Float64MultiArray, queue_size=10)
-
-        # Get axes
-        self.axes = [int(a) for a in rospy.get_param('~axes').split(' ')]
-        naxes = len(self.axes)
-
-        # Get scale
-        scale_ = rospy.get_param('~scale', [1.0]*naxes)
-        if isinstance(scale_, (float, int)):
-            scale = [float(scale_)]*naxes
-        elif isinstance(scale_, str):
-            scale = [float(s) for s in scale_.split(' ')]
-            if len(scale) == 1:
-                scale = [scale]*naxes
-        elif isinstance(scale_, (list, tuple)):
-            scale = [float(s) for s in scale_]
-        else:
-            raise ValueError(f'Parameter ~scale type ({type(scale_)}) is not recognized!')
-
-        self.scale = np.array(scale)
-
-        # Setup ros subscriber
-        rospy.Subscriber('joy', Joy, self.callback)
-
+class ScaleNode(BasicOperatorNode):
 
     def callback(self, msg):
         axes = np.array(msg.axes)
         signal = self.scale*axes[self.axes]
-        self.pub.publish(Float64MultiArray(data=signal.tolist()))
-
-
-    def spin(self):
-        rospy.spin()
-
-
-def main():
-    Node().spin()
+        self.publish(signal)
 
 
 if __name__ == '__main__':
-    main()
+    main(ScaleNode)
