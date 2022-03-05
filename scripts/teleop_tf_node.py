@@ -73,7 +73,15 @@ class Node:
         return success, message
 
     def callback(self, msg):
-        self.h[:6] = np.array(msg.data[:6])
+        n = len(msg.data)
+        if n == 3:
+            # update only position
+            self.h[:3] = np.array(msg.data)
+        elif n == 6:
+            # update position and rotation
+            self.h[:6] = np.array(msg.data)
+        else:
+            raise ValueError(f"recieved operator signal is not correct length, expected 3 or 6, got {n}")
 
     def main_loop(self, event):
         self.pose += self.dt*self.h
