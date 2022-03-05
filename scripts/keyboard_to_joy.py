@@ -27,10 +27,6 @@ from keyboard.msg import Key
 
 class Node:
 
-    HZ = 100
-    DT = 1.0/float(HZ)
-
-
     def __init__(self):
 
         # Setup
@@ -57,7 +53,8 @@ class Node:
         rospy.Subscriber('keyboard/keydown', Key, self.callback_keydown)
 
         # Start timer
-        rospy.Timer(rospy.Duration(self.DT), self.main_loop)
+        dt = 1.0/float(rospy.get_param('~hz', 100))
+        rospy.Timer(rospy.Duration(dt), self.main_loop)
 
 
     def callback_keyup(self, msg):
