@@ -20,11 +20,13 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import rospy
+import math
 import numpy as np
 import tf_conversions
-from std_srvs.srv import SetBool, SetBoolResponse
 from std_msgs.msg import Float64MultiArray
 from rpbi.tf_interface import TfInterface
+from custom_srvs.srv import SetTransform, SetTransformResponse
+from custom_srvs import ToggleService
 
 class Node:
 
@@ -36,17 +38,18 @@ class Node:
         hz = rospy.get_param('~hz', 100)
         self.dt = 1.0/float(hz)
         self.h = np.zeros(6)
-        self.pose = np.zeros(6)  # position + euler angles
+        self.transform = np.zeros(6)  # position + euler angles
         self.timer = None
         self.sub = None
-        rospy.Service('toggle_teleop_tf', SetBool, self.toggle_teleop_tf)
+        ToggleService('toggle_teleop_tf', self.start_teleop, self.stop_teleop)
+        rospy.Service('reset_transform', SetTransform, self.reset_transform)
 
-    def toggle_teleop_tf(self, req):
-        if req.data:
-            success, message = self.start_teleop()
-        else:
-            success, message = self.stop_teleop()
-        return SetBoolResponse(message=message, success=success)
+    def reset_transform(self, req):
+        self.transform[:3] = np.array([getattr(req.transform.translation, dim) for dim in 'xyz'])
+        rot = np.array([getattr(req.transform.rotation, dim) for dim in 'xyzw'])
+        if math.isclose(np.linalg.norm(rot), 1.0):
+            self.transform[3:] = tf_conversions.transformations.euler_from_quaternion(rot)
+        return SetTransformResponse(success=True, message='reset transform to ' + str(self.transform))
 
     def start_teleop(self):
         if (self.sub is None) and (self.timer is None):
@@ -84,8 +87,8 @@ class Node:
             raise ValueError(f"recieved operator signal is not correct length, expected 3 or 6, got {n}")
 
     def main_loop(self, event):
-        self.pose += self.dt*self.h
-        self.tf.set_tf(self.parent_frame, self.child_frame, self.pose[:3], tf_conversions.transformations.quaternion_from_euler(self.pose[3], self.pose[4], self.pose[5]))
+        self.transform += self.dt*self.h
+        self.tf.set_tf(self.parent_frame, self.child_frame, self.transform[:3], tf_conversions.transformations.quaternion_from_euler(self.transform[3], self.transform[4], self.transform[5]))
 
     def spin(self):
         rospy.spin()
