@@ -17,6 +17,7 @@
   <depend>roscpp</depend>
   <depend>rospy</depend>
   <depend>std_msgs</depend>
+  <depend>custom_srvs</depend>
   <depend>sensor_msgs</depend>
   <depend>joy</depend>
   <depend>keyboard</depend>

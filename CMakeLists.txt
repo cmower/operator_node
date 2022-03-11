@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf2_ros
   keyboard
   message_generation
+  custom_srvs
   )
 
 catkin_python_setup()
