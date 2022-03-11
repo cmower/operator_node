@@ -43,10 +43,13 @@ class Node:
         self.msg.axes = [0.0]*len(axes)
 
         self.buttons_key_ids = []
-        buttons = rospy.get_param('~buttons', []).split(' ')
-        for b in buttons:
-            self.buttons_key_ids.append(getattr(Key, 'KEY_'+b))
-        self.msg.buttons = [0]*len(buttons)
+        buttons = rospy.get_param('~buttons', '')
+
+        if buttons != '':
+            buttons = buttons.split(' ')
+            for b in buttons:
+                self.buttons_key_ids.append(getattr(Key, 'KEY_'+b))
+            self.msg.buttons = [0]*len(buttons)
 
         # Start subscribers
         rospy.Subscriber('keyboard/keyup', Key, self.callback_keyup)
