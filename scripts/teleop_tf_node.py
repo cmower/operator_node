@@ -25,7 +25,7 @@ import tf_conversions
 from std_msgs.msg import Float64MultiArray
 from rpbi.tf_interface import TfInterface
 from custom_srvs.srv import SetTransform, SetTransformResponse
-from custom_srvs import ToggleService
+from custom_srvs.custom_srvs import ToggleService
 
 class Node:
 
