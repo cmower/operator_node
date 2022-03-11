@@ -20,7 +20,6 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import rospy
-import math
 import numpy as np
 import tf_conversions
 from std_msgs.msg import Float64MultiArray
@@ -47,8 +46,7 @@ class Node:
     def reset_transform(self, req):
         self.transform[:3] = np.array([getattr(req.transform.translation, dim) for dim in 'xyz'])
         rot = np.array([getattr(req.transform.rotation, dim) for dim in 'xyzw'])
-        if math.isclose(np.linalg.norm(rot), 1.0):
-            self.transform[3:] = tf_conversions.transformations.euler_from_quaternion(rot)
+        self.transform[3:] = tf_conversions.transformations.euler_from_quaternion(rot)
         return SetTransformResponse(success=True, message='reset transform to ' + str(self.transform))
 
     def start_teleop(self):
