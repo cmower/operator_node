@@ -29,27 +29,20 @@ class Node:
 
     def __init__(self):
 
-        # Setup
+        # Initialize ROS
         rospy.init_node('keyboard_to_joy_node')
+
+        # Setup publisher
         self.pub = rospy.Publisher('joy', Joy, queue_size=10)
-        self.msg = Joy()
 
-        # Get params
-        self.axes_key_ids = []
-        axes = rospy.get_param('~axes', [])
-        for a in axes:
-            neg_key, pos_key = a.split(' ')
-            self.axes_key_ids.append([getattr(Key, 'KEY_'+neg_key), getattr(Key, 'KEY_'+pos_key)])
-        self.msg.axes = [0.0]*len(axes)
+        # Get parameters
+        config = rospy.get_param('~config')
+        self.axes_neg_code = [getattr(Key, "KEY_%s"%a[0]) for a in config['axes']]
+        self.axes_pos_code = [getattr(Key, "KEY_%s"%a[1]) for a in config['axes']]
+        self.buttons_code = [getattr(Key, "KEY_%s"%k) for k in config.get('buttons', [])]
 
-        self.buttons_key_ids = []
-        buttons = rospy.get_param('~buttons', '')
-
-        if buttons != '':
-            buttons = buttons.split(' ')
-            for b in buttons:
-                self.buttons_key_ids.append(getattr(Key, 'KEY_'+b))
-            self.msg.buttons = [0]*len(buttons)
+        # Setup joy message
+        self.msg = Joy(axes=[0.0]*len(config['axes']), buttons=[0]*len(self.buttons_code))
 
         # Start subscribers
         rospy.Subscriber('keyboard/keyup', Key, self.callback_keyup)
@@ -59,50 +52,36 @@ class Node:
         dt = 1.0/float(rospy.get_param('~hz', 100))
         rospy.Timer(rospy.Duration(dt), self.main_loop)
 
+        rospy.loginfo('initialized keyboard_to_joy node')
+
+    def _update_buttons(self, msg, value):
+        if msg.code in self.buttons_code:
+            self.msg.buttons[self.buttons_code.index(msg.code)] = value
+            return True
+        return False
+
+    def _update_axes(self, msg, axes_code, value):
+        if msg.code in axes_code:
+            self.msg.axes[axes_code.index(msg.code)] += value
+            return True
+        return False
+
 
     def callback_keyup(self, msg):
-
-        # Handle buttons
-        try:
-            self.msg.buttons[self.buttons_key_ids.index(msg.code)] = 0
-            done = True
-        except ValueError:
-            done = False
-
-        if done:
+        if self._update_buttons(msg, 0):
             return
-
-        # Handle axes
-        for i, a in enumerate(self.axes_key_ids):
-            if msg.code == a[0]:
-                self.msg.axes[i] += 1.0
-                return
-            elif msg.code == a[1]:
-                self.msg.axes[i] -= 1.0
-                return
-
+        if self._update_axes(msg, self.axes_neg_code, 1.0):
+            return
+        if self._update_axes(msg, self.axes_pos_code, -1.0):
+            return
 
     def callback_keydown(self, msg):
-
-        # Handle buttons
-        try:
-            self.msg.buttons[self.buttons_key_ids.index(msg.code)] = 1
-            done = True
-        except ValueError:
-            done = False
-
-        if done:
+        if self._update_buttons(msg, 1):
             return
-
-        # Handle axes
-        for i, a in enumerate(self.axes_key_ids):
-            if msg.code == a[0]:
-                self.msg.axes[i] -= 1.0
-                return
-            elif msg.code == a[1]:
-                self.msg.axes[i] += 1.0
-                return
-
+        if self._update_axes(msg, self.axes_neg_code, -1.0):
+            return
+        if self._update_axes(msg, self.axes_pos_code, 1.0):
+            return
 
     def main_loop(self, event):
         self.msg.header.stamp = rospy.Time.now()

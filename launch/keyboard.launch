@@ -3,11 +3,7 @@
   <node pkg="keyboard" name="keyboard" type="keyboard"/>
 
   <node pkg="operator_node" name="keyboard_to_joy" type="keyboard_to_joy.py">
-    <param name="buttons" type="str" value="a s d"/>
-    <rosparam param="axes">[
-    "LEFT RIGHT",
-    "DOWN UP"
-    ]</rosparam>
+    <rosparam param="config" file="$(find operator_node)/configs/keyboard_to_joy.yaml"/>
   </node>
 
   <node pkg="operator_node" name="keyboard_scale" type="scale_node.py">
