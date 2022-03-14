@@ -34,9 +34,9 @@ class IsometricNode(BasicOperatorNode):
         # Ensure isometry
         nrm = np.linalg.norm(axes)
         if nrm > 0.0:
-            signal = self.scale*min(nrm, 1.0)*axes/nrm
+            signal = (self.scale*min(nrm, 1.0)/nrm) * axes
         else:
-            signal = self.scale*axes.copy()
+            signal = np.zeros(axes.shape)
 
         # Publish
         self.publish(signal)
