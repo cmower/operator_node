@@ -1,90 +1,57 @@
 import rospy
-from abc import ABC, abstractmethod
 import numpy as np
 from sensor_msgs.msg import Joy
+from abc import ABC, abstractmethod
 from std_msgs.msg import Float64MultiArray
-from std_srvs.srv import SetBool, SetBoolResponse
 
-class BasicOperatorNode(ABC):
+class OperatorNode(ABC):
 
     def __init__(self):
 
-        # Init node
+        ########################################
+        ## Initialize ROS node
         rospy.init_node('operator_node')
 
-        # Setup publisher
-        self.pub = rospy.Publisher('operator_node/signal', Float64MultiArray, queue_size=10)
+        ########################################
+        ## Get axes parameter
+        self.axes_idx = [int(a) for a in rospy.get_param('~axes').split(' ')]
+        naxes = len(self.axes_idx)
 
-        # Get axes
-        self.axes = [int(a) for a in rospy.get_param('~axes').split(' ')]
-        naxes = len(self.axes)
-
-        # Get scale
-        scale_ = rospy.get_param('~scale', [1.0]*naxes)
-        if isinstance(scale_, (float, int)):
-            scale = [float(scale_)]*naxes
-        elif isinstance(scale_, str):
-            scale = [float(s) for s in scale_.split(' ')]
+        ########################################
+        ## Get scale parameter
+        _scale = rospy.get_param('~scale', [1.0]*naxes)
+        if isinstance(_scale, (float, int)):
+            self.scale = float(_scale)
+        elif isinstance(_scale, str):
+            scale = [float(s) for s in _scale.split(' ')]
             if len(scale) == 1:
-                scale = [scale]*naxes
-        elif isinstance(scale_, (list, tuple)):
-            scale = [float(s) for s in scale_]
+                self.scale = scale[0]
+            else:
+                self.scale = np.array(scale)
+        elif isinstance(_scale, (list, tuple)):
+            self.scale = np.array([float(s) for s in _scale])
         else:
-            raise ValueError(f'Parameter ~scale type ({type(scale_)}) is not recognized!')
+            raise ValueError(f'Parameter ~scale type ({type(_scale)}) is not recognized!')
 
-        self.scale = np.array(scale).flatten()
+        ########################################
+        ## Setup publisher and start subscriber
+        self.pub = rospy.Publisher('operator_node/signal', Float64MultiArray, queue_size=10)
+        rospy.Subscriber('joy', Joy, self.callback)
 
-        # Setup ros service
-        rospy.Service('operator_node/%s/toggle_callback' % self.__class__.__name__.lower(), SetBool, self.toggle)
-
-        # Start on initialization
-        success = True
-        self.sub = None
-        if rospy.get_param('~start_on_init', False):
-            success, _ = self.start_callback()
-
-        if success:
-            rospy.loginfo('started operator node server')
+        rospy.loginfo('started operator node server')
 
     @abstractmethod
     def callback(self, msg):
         pass
 
-    def toggle(self, req):
-        if req.data:
-            success, message = self.start_callback()
-        else:
-            success, message = self.stop_callback()
-        return SetBoolResponse(success=success, message=message)
-
-
-    def start_callback(self):
-        if not self.sub:
-            self.sub = rospy.Subscriber('joy', Joy, self.callback)
-            success = True
-            message = 'started callback'
-        else:
-            success = False
-            message = 'user attempted to register subscriber but it is already registered!'
-            rospy.logerr(message)
-        return success, message
-
-
-    def stop_callback(self):
-        if self.sub:
-            self.sub.unregister()
-            self.sub = None
-            success = True
-            message = 'stopped callback'
-        else:
-            success = False
-            message = 'user attempted to unregister subscriber but it is not registered!'
-            rospy.logerr(message)
-        return success, message
-
+    def get_axes(self, msg):
+        """Returns axes as numpy array in specified order."""
+        a = np.array(msg.axes)
+        return a[self.axes_idx]
 
     def publish(self, signal):
-        self.pub.publish(Float64MultiArray(data=np.asarray(signal).tolist()))
+        """Publishes an operator signal to ROS - signal must be a array-like object with float elements."""
+        self.pub.publish(Float64MultiArray(data=signal))
 
 
     def spin(self):

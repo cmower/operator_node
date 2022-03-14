@@ -20,16 +20,15 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import numpy as np
-from operator_node.node import BasicOperatorNode, main
+from operator_node.node import OperatorNode, main
 
 
-class IsometricNode(BasicOperatorNode):
+class IsometricNode(OperatorNode):
 
     def callback(self, msg):
 
         # Get axes
-        axes_ = np.array(msg.axes)
-        axes = axes_[self.axes]
+        axes = self.get_axes(msg)
 
         # Ensure isometry
         nrm = np.linalg.norm(axes)

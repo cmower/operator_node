@@ -19,15 +19,12 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-import numpy as np
-from operator_node.node import BasicOperatorNode, main
+from operator_node.node import OperatorNode, main
 
-class ScaleNode(BasicOperatorNode):
+class ScaleNode(OperatorNode):
 
     def callback(self, msg):
-        axes = np.array(msg.axes)
-        signal = self.scale*axes[self.axes]
-        self.publish(signal)
+        self.publish(self.scale*self.get_axes(msg))
 
 
 if __name__ == '__main__':
