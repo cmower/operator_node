@@ -25,6 +25,11 @@ from operator_node.node import OperatorNode, main
 
 class IsometricNode(OperatorNode):
 
+    def __init__(self):
+        OperatorNode.__init__(self)
+        if isinstance(self.scale, np.ndarray):
+            assert (self.scale==self.scale[0]).all(), "for the isometric_node.py, the scale must all be equal"
+
     def callback(self, msg):
 
         # Get axes

@@ -85,7 +85,7 @@ the `1` is for the time stamp.
 * `~scale`  (either: list[float], float, or str)
 
   When
-    * list[float] must be same length as `~axes`, and is the scale applied in each axes
+    * list[float] must be same length as `~axes`, and is the scale applied in each axes. Note, in this case, all elements in the scale should be equal. It is suggested that you use a single float to represent the scale for this node.
 	* float scales each axis
 	* str assumes is either a list of floats or a single float (i.e. above applies)
 
