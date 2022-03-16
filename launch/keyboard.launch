@@ -12,6 +12,7 @@
   <node pkg="operator_node" name="keyboard_scale" type="scale_node.py">
     <param name="axes" type="str" value="0 1"/>
     <param name="scale" type="str" value="1.0"/>
+    <!-- <param name="start_on_init" type="bool" value="true"/> -->
   </node>
 
 </launch>
