@@ -76,6 +76,8 @@ the `1` is for the time stamp.
 
 ## `isometric_node.py`
 
+Scale the interface axes but ensure isometric.
+
 ### Parameters
 
 * `~axes` (list[int])
@@ -113,6 +115,8 @@ the `1` is for the time stamp.
 
 ## `scale_node.py`
 
+Simply scale each interface axes.
+
 ### Parameters
 
 * `~axes` (list[int])
@@ -149,6 +153,8 @@ the `1` is for the time stamp.
   Toggle the operator node on/off.
 
 ## `keyboard_to_joy.py`
+
+Map keyboard events to `sensor_msgs/Joy` messages.
 
 ### Parameters
 
