@@ -38,6 +38,7 @@ class OperatorNode(ABC):
         ## Setup publisher and start subscriber
         self.pub = rospy.Publisher('operator_node/signal', Float64MultiArray, queue_size=10)
         self.sub = None
+        ToggleService('operator_node/toggle', self.start, self.stop)
 
         if rospy.get_param('~start_on_init', False):
             self.start()
