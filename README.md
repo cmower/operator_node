@@ -46,13 +46,13 @@ the `1` is for the time stamp.
 
 ### Subscribed topics
 
-* `operator_node/signal` ([std_msgs/Float64MultiArray](http://docs.ros.org/en/noetic/api/std_msgs/html/msg/Float64MultiArray.html)
+* `operator_node/signal` ([std_msgs/Float64MultiArray](http://docs.ros.org/en/noetic/api/std_msgs/html/msg/Float64MultiArray.html))
 
   Operator signals.
 
 ### Published topics
 
-* `operator_node/window` ([std_msgs/Float64MultiArray](http://docs.ros.org/en/noetic/api/std_msgs/html/msg/Float64MultiArray.html)
+* `operator_node/window` ([std_msgs/Float64MultiArray](http://docs.ros.org/en/noetic/api/std_msgs/html/msg/Float64MultiArray.html))
 
   A list of operator signals recieved in the previous window of time. Note, a helper function in Python is provided, see example:
 
@@ -103,7 +103,7 @@ Scale the interface axes but ensure isometric.
 
 ### Published topics
 
-* `operator_node/signal` ([std_msgs/Float64MultiArray](http://docs.ros.org/en/noetic/api/std_msgs/html/msg/Float64MultiArray.html)
+* `operator_node/signal` ([std_msgs/Float64MultiArray](http://docs.ros.org/en/noetic/api/std_msgs/html/msg/Float64MultiArray.html))
 
   Operator signals.
 
@@ -142,7 +142,7 @@ Simply scale each interface axes.
 
 ### Published topics
 
-* `operator_node/signal` ([std_msgs/Float64MultiArray](http://docs.ros.org/en/noetic/api/std_msgs/html/msg/Float64MultiArray.html)
+* `operator_node/signal` ([std_msgs/Float64MultiArray](http://docs.ros.org/en/noetic/api/std_msgs/html/msg/Float64MultiArray.html))
 
   Operator signals.
 
