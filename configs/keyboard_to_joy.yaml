@@ -1,4 +1,5 @@
 axes:
+  # [-ve, +ve]
   - ["LEFT", "RIGHT"]
   - ["DOWN", "UP"]
 buttons: ["a", "s", "d"]

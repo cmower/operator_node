@@ -1,5 +1,0 @@
-<launch>
-
-  <node pkg="operator_node" name="mouse" type="mouse_input_node.py"/>
-
-</launch>

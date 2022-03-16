@@ -1,11 +1,14 @@
 <launch>
 
+  <!-- Keyboard driver -->
   <node pkg="keyboard" name="keyboard" type="keyboard"/>
 
+  <!-- Map keyboard to sensor_msgs/Joy messages -->
   <node pkg="operator_node" name="keyboard_to_joy" type="keyboard_to_joy.py">
     <rosparam param="config" file="$(find operator_node)/configs/keyboard_to_joy.yaml"/>
   </node>
 
+  <!-- Map raw keyboard commands (sensor_msgs/Joy messages) to operator signal -->
   <node pkg="operator_node" name="keyboard_scale" type="scale_node.py">
     <param name="axes" type="str" value="0 1"/>
     <param name="scale" type="str" value="1.0"/>
