@@ -17,7 +17,7 @@ class OperatorNode(ABC):
         ## Get config
         config = rospy.get_param('~config')
         self.axes_idx = np.array(config['axes_idx'], dtype=int)
-        self.scale = np.clip(np.array(config.get('scale', [1.0]*self.axes_idx.shape[0]), dtype=float), 0.0, np.inf)
+        self.scale = np.clip(np.array(config.get('scale', 1.0), dtype=float), 0.0, np.inf)
 
         ########################################
         ## Setup publisher and start subscriber
