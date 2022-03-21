@@ -80,16 +80,13 @@ Scale the interface axes but ensure isometric.
 
 ### Parameters
 
-* `~axes` (list[int])
+* `~config/axes_idx` (list[int])
 
   Indicices of the axes to be used to generate operator signal.
 
-* `~scale`  (either: list[float], float, or str)
+* `~config/scale`  (either: list[float] or float, min: 0.0, max: inf)
 
-  When
-    * list[float] must be same length as `~axes`, and is the scale applied in each axes. Note, in this case, all elements in the scale should be equal. It is suggested that you use a single float to represent the scale for this node.
-	* float scales each axis
-	* str assumes is either a list of floats or a single float (i.e. above applies)
+  Maximum operator signal magnitude. Note, if array given then all elements must be equal.
 
 * `~start_on_init` (bool, default: False)
 
@@ -119,16 +116,13 @@ Simply scale each interface axes.
 
 ### Parameters
 
-* `~axes` (list[int])
+* `~config/axes_idx` (list[int])
 
   Indicices of the axes to be used to generate operator signal.
 
-* `~scale`  (either: list[float], float, or str)
+* `~config/scale`  (either: list[float], float, min: 0.0, max: inf, default: 1.0)
 
-  When
-    * list[float] must be same length as `~axes`, and is the scale applied in each axes
-	* float scales each axis
-	* str assumes is either a list of floats or a single float (i.e. above applies)
+  Maximum operator signal magnitude along each dimension.
 
 * `~start_on_init` (bool, default: False)
 
