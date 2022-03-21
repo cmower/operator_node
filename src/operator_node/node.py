@@ -14,25 +14,10 @@ class OperatorNode(ABC):
         rospy.init_node('operator_node')
 
         ########################################
-        ## Get axes parameter
-        self.axes_idx = [int(a) for a in rospy.get_param('~axes').split(' ')]
-        naxes = len(self.axes_idx)
-
-        ########################################
-        ## Get scale parameter
-        _scale = rospy.get_param('~scale', [1.0]*naxes)
-        if isinstance(_scale, (float, int)):
-            self.scale = float(_scale)
-        elif isinstance(_scale, str):
-            scale = [float(s) for s in _scale.split(' ')]
-            if len(scale) == 1:
-                self.scale = scale[0]
-            else:
-                self.scale = np.array(scale)
-        elif isinstance(_scale, (list, tuple)):
-            self.scale = np.array([float(s) for s in _scale])
-        else:
-            raise ValueError(f'Parameter ~scale type ({type(_scale)}) is not recognized!')
+        ## Get config
+        config = rospy.get_param('~config')
+        self.axes_idx = np.array(config['axes_idx'], dtype=int)
+        self.scale = np.clip(np.array(config.get('scale', [1.0]*self.axes_idx.shape[0]), dtype=float), 0.0, np.inf)
 
         ########################################
         ## Setup publisher and start subscriber
