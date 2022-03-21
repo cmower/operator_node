@@ -28,7 +28,7 @@ class OperatorNode(ABC):
         if rospy.get_param('~start_on_init', False):
             self.start()
 
-        rospy.loginfo('started operator node server')
+        rospy.loginfo('initialized operator node server')
 
     def start(self):
         if self.sub is None:
