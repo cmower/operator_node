@@ -3,7 +3,7 @@ import numpy as np
 from sensor_msgs.msg import Joy
 from abc import ABC, abstractmethod
 from std_msgs.msg import Float64MultiArray
-from custom_srvs.custom_srvs import ToggleService
+from custom_ros_toos.ros_comm import ToggleService
 
 class OperatorNode(ABC):
 
