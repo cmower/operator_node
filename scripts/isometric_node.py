@@ -27,10 +27,9 @@ class IsometricNode(OperatorNode):
 
     def __init__(self):
         OperatorNode.__init__(self)
-        if self.scale.ndim > 0:
-            assert (self.scale==self.scale[0]).all(), "when 'scale' is an array, all elements must be equal"
         if isinstance(self.scale, np.ndarray):
-
+            if self.scale.ndim > 0:
+                assert (self.scale==self.scale[0]).all(), "when 'scale' is an array, all elements must be equal"
 
     def callback(self, msg):
 
