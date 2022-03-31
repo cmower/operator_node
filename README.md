@@ -84,9 +84,9 @@ Scale the interface axes but ensure isometric.
 
   Indicices of the axes to be used to generate operator signal.
 
-* `~config/scale`  (either: list[float] or float, min: 0.0, max: inf)
+* `~config/scale`  (float, min: 0.0, max: inf, default: 1.0)
 
-  Maximum operator signal magnitude. Note, if array given then all elements must be equal.
+  Maximum operator signal magnitude.
 
 * `~start_on_init` (bool, default: False)
 
@@ -120,7 +120,7 @@ Simply scale each interface axes.
 
   Indicices of the axes to be used to generate operator signal.
 
-* `~config/scale`  (either: list[float], float, min: 0.0, max: inf, default: 1.0)
+* `~config/scale`  (either: list[float], float, default: 1.0)
 
   Maximum operator signal magnitude along each dimension.
 
