@@ -15,9 +15,7 @@ class OperatorNode(ABC):
 
         ########################################
         ## Get config
-        config = rospy.get_param('~config')
-        self.axes_idx = np.array(config['axes_idx'], dtype=int)
-        self.scale = np.array(config.get('scale', 1.0), dtype=float)
+        self.config = rospy.get_param('~config')
 
         ########################################
         ## Setup publisher and start subscriber
@@ -25,9 +23,9 @@ class OperatorNode(ABC):
         self.sub = None
         ToggleService('operator_node/toggle', self.start, self.stop)
 
+    def post_init(self):
         if rospy.get_param('~start_on_init', False):
             self.start()
-
         rospy.loginfo('initialized operator node server')
 
     def start(self):
@@ -50,11 +48,6 @@ class OperatorNode(ABC):
     @abstractmethod
     def callback(self, msg):
         pass
-
-    def get_axes(self, msg):
-        """Returns axes as numpy array in specified order."""
-        a = np.array(msg.axes)
-        return a[self.axes_idx]
 
     def publish(self, signal):
         """Publishes an operator signal to ROS - signal must be a array-like object with float elements."""
