@@ -11,7 +11,7 @@ class IsometricNode(OperatorNode):
         super().__init__()
 
         # Get parameters
-        self.axes_id = np.array(self.config['axes_id'], dtype=int)
+        self.axes_id = np.array(self.config['axes_idx'], dtype=int)
         scale = float(self.config.get('scale', 1.0))
         self.scale = np.clip(scale, 0.0, np.inf)
 

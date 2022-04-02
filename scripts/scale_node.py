@@ -10,7 +10,7 @@ class ScaleNode(OperatorNode):
         super().__init__()
 
         # Get parameters
-        self.axes_id = np.array(self.config['axes_id'], dtype=int)
+        self.axes_id = np.array(self.config['axes_idx'], dtype=int)
         scale = self.config.get('scale', 1.0)
         if isinstance(scale, (float, int)):
             self.scale = float(scale)*np.ones(self.axes_id.shape[0], dtype=float)
